@@ -6,7 +6,7 @@ import (
 )
 
 func TestLexer(t *testing.T) {
-	input := "=+-;==<<=>>="
+	input := "=+-;==<<=>>=int variable constant if else begin end asdf"
 
 	tests := []struct {
 		expectedType    token.TokenType
@@ -21,6 +21,14 @@ func TestLexer(t *testing.T) {
 		{token.LE, "<="},
 		{token.GT, ">"},
 		{token.GE, ">="},
+		{token.INT, "INT"},
+		{token.VARIABLE, "VARIABLE"},
+		{token.CONSTANT, "CONSTANT"},
+		{token.IF, "IF"},
+		{token.ELSE, "ELSE"},
+		{token.BEGIN, "BEGIN"},
+		{token.END, "END"},
+		{token.IDENT, "asdf"},
 	}
 
 	l := New(input)
