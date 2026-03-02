@@ -6,7 +6,7 @@ import (
 )
 
 func TestLexer(t *testing.T) {
-	input := "=+-;"
+	input := "=+-;==<<=>>="
 
 	tests := []struct {
 		expectedType    token.TokenType
@@ -16,6 +16,11 @@ func TestLexer(t *testing.T) {
 		{token.PLUS, "+"},
 		{token.MINUS, "-"},
 		{token.SEMICOLON, ";"},
+		{token.EQ, "=="},
+		{token.LT, "<"},
+		{token.LE, "<="},
+		{token.GT, ">"},
+		{token.GE, ">="},
 	}
 
 	l := New(input)

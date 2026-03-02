@@ -25,18 +25,53 @@ func (l *Lexer) readChar() {
 	l.head += 1
 }
 
+func (l *Lexer) goBack() {
+	if l.head > 0 {
+		l.head--
+	}
+}
+
 func (l *Lexer) nextToken() token.Token {
 	var tok token.Token
 
+	literal := string(l.ch)
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		temp := string(l.ch)
+		l.readChar()
+		if l.ch == '=' {
+			temp += string(l.ch)
+			tok = newToken(token.EQ, temp)
+		} else {
+			l.goBack()
+			tok = newToken(token.ASSIGN, literal)
+		}
+	case '>':
+		temp := string(l.ch)
+		l.readChar()
+		if l.ch == '=' {
+			temp += string(l.ch)
+			tok = newToken(token.GE, temp)
+		} else {
+			l.goBack()
+			tok = newToken(token.GT, literal)
+		}
+	case '<':
+		temp := string(l.ch)
+		l.readChar()
+		if l.ch == '=' {
+			temp += string(l.ch)
+			tok = newToken(token.LE, temp)
+		} else {
+			l.goBack()
+			tok = newToken(token.LT, literal)
+		}
 	case ';':
-		tok = newToken(token.SEMICOLON, l.ch)
+		tok = newToken(token.SEMICOLON, literal)
 	case '+':
-		tok = newToken(token.PLUS, l.ch)
+		tok = newToken(token.PLUS, literal)
 	case '-':
-		tok = newToken(token.MINUS, l.ch)
+		tok = newToken(token.MINUS, literal)
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -46,6 +81,6 @@ func (l *Lexer) nextToken() token.Token {
 	return tok
 }
 
-func newToken(tokenType token.TokenType, ch byte) token.Token {
-	return token.Token{Type: tokenType, Literal: string(ch)}
+func newToken(tokenType token.TokenType, literal string) token.Token {
+	return token.Token{Type: tokenType, Literal: literal}
 }
