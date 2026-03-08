@@ -104,6 +104,9 @@ func readString(l *Lexer) token.Token {
 		str += string(l.ch)
 		l.readChar()
 	}
+	if l.ch != ' ' {
+		l.goBack()
+	}
 	isKeyword := checkKeyword(str)
 	if isKeyword {
 		tok = createKeyword(str)
