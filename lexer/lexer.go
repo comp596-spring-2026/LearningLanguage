@@ -34,11 +34,21 @@ func (l *Lexer) goBack() {
 	}
 }
 
-func (l *Lexer) nextToken() token.Token {
+func (l *Lexer) ignoreWhitespace() {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		l.readChar()
+	}
+}
+
+func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
+
+	l.ignoreWhitespace()
 
 	if isLetter(l.ch) {
 		tok = readString(l)
+	} else if isNumber(l.ch) {
+		tok = readNumber(l)
 	} else {
 		literal := string(l.ch)
 		switch l.ch {
@@ -92,8 +102,23 @@ func newToken(tokenType token.TokenType, literal string) token.Token {
 	return token.Token{Type: tokenType, Literal: literal}
 }
 
+func isNumber(char byte) bool {
+	return '0' <= char && char <= '9'
+}
+
 func isLetter(char byte) bool {
 	return 'a' <= char && char <= 'z' || 'A' <= char && char <= 'Z' || char == '_'
+}
+
+func readNumber(l *Lexer) token.Token {
+	str := string(l.ch)
+	l.readChar()
+	for isNumber(l.ch) {
+		str += string(l.ch)
+		l.readChar()
+	}
+	l.goBack()
+	return newToken(token.INT, str)
 }
 
 func readString(l *Lexer) token.Token {
@@ -104,9 +129,7 @@ func readString(l *Lexer) token.Token {
 		str += string(l.ch)
 		l.readChar()
 	}
-	if l.ch != ' ' {
-		l.goBack()
-	}
+	l.goBack()
 	isKeyword := checkKeyword(str)
 	if isKeyword {
 		tok = createKeyword(str)
@@ -136,7 +159,7 @@ func createKeyword(str string) token.Token {
 	case "end":
 		tok = newToken(token.END, "END")
 	case "int":
-		tok = newToken(token.INT, "INT")
+		tok = newToken(token.INTTYPE, "INTTYPE")
 	}
 	return tok
 }
