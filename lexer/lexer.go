@@ -1,11 +1,42 @@
 package lexer
 
+/*
+Language subset currently being worked on:
+create int a;
+create int b;
+set b = 3;
+set a = 5;
+
+if a > b begin;
+c = a - b; end;
+else begin;
+c = b - a; end;
+
+Tokens:
+CREATE
+SET
+INT
+IDENTIFIER
+EQUAL
+NUMBER
+SEMICOLON
+IF
+GREATER
+LESS
+GE
+LE
+EQ
+BEGIN
+END
+MINUS
+*/
+
 import (
 	"learningLanguage/token"
 	"slices"
 )
 
-var keywords = []string{"int", "variable", "constant", "if", "else", "begin", "end"}
+var keywords = []string{"int", "create", "set", "if", "else", "begin", "end"}
 
 type Lexer struct {
 	input string
@@ -121,7 +152,7 @@ func readNumber(l *Lexer) token.Token {
 		l.readChar()
 	}
 	l.goBack()
-	return newToken(token.INT, str)
+	return newToken(token.NUMBER, str)
 }
 
 func readString(l *Lexer) token.Token {
@@ -149,20 +180,20 @@ func checkKeyword(str string) bool {
 func createKeyword(str string) token.Token {
 	var tok token.Token
 	switch str {
-	case "variable":
-		tok = newToken(token.VARIABLE, "VARIABLE")
-	case "constant":
-		tok = newToken(token.CONSTANT, "CONSTANT")
+	case "create":
+		tok = newToken(token.CREATE, str)
+	case "set":
+		tok = newToken(token.SET, str)
 	case "if":
-		tok = newToken(token.IF, "IF")
+		tok = newToken(token.IF, str)
 	case "else":
-		tok = newToken(token.ELSE, "ELSE")
+		tok = newToken(token.ELSE, str)
 	case "begin":
-		tok = newToken(token.BEGIN, "BEGIN")
+		tok = newToken(token.BEGIN, str)
 	case "end":
-		tok = newToken(token.END, "END")
+		tok = newToken(token.END, str)
 	case "int":
-		tok = newToken(token.INTTYPE, "INTTYPE")
+		tok = newToken(token.INT, str)
 	}
 	return tok
 }
