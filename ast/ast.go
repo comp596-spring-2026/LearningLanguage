@@ -29,6 +29,15 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
+//Variable Creation Statement
+type CreateStatement struct {
+	Token token.Token
+	Name  *Identifier
+}
+
+func (ls *CreateStatement) statementNode()
+func (ls *CreateStatement) TokenLiteral() string { return ls.Token.Literal }
+
 //Variable Assignment Statement
 type AssignStatement struct {
 	Token token.Token
