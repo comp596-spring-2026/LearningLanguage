@@ -35,23 +35,23 @@ type CreateStatement struct {
 	Name  *Identifier
 }
 
-func (ls *CreateStatement) statementNode()
+func (ls *CreateStatement) statementNode()       {}
 func (ls *CreateStatement) TokenLiteral() string { return ls.Token.Literal }
 
-//Variable Assignment Statement
-type AssignStatement struct {
+//Variable Set Statement
+type SetStatement struct {
 	Token token.Token
 	Name  *Identifier
 	Value Expression
 }
 
-func (ls *AssignStatement) statementNode()
-func (ls *AssignStatement) TokenLiteral() string { return ls.Token.Literal }
+func (ls *SetStatement) statementNode()       {}
+func (ls *SetStatement) TokenLiteral() string { return ls.Token.Literal }
 
 type Identifier struct {
 	Token token.Token
 	Value string
 }
 
-func (i *Identifier) expressionNode()
+func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
