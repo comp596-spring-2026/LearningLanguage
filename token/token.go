@@ -46,9 +46,11 @@ const (
 	INT    = "INT"
 	NUMBER = "NUMBER"
 
-	ASSIGN = "ASSIGN"
-	PLUS   = "PLUS"
-	MINUS  = "MINUS"
+	ASSIGN   = "ASSIGN"
+	PLUS     = "PLUS"
+	MINUS    = "MINUS"
+	DIVIDE   = "DIVIDE"
+	MULTIPLY = "MULTIPLY"
 
 	EQ = "EQUALTO"
 	GT = "GREATER"
