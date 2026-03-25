@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"learningLanguage/lexer"
-	"learningLanguage/token"
+	"learningLanguage/parser"
 )
 
 func Start(in io.Reader, out io.Writer) {
@@ -18,10 +18,16 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		line := scanner.Text()
-		l := lexer.New(line)
+		lexer := lexer.New(line)
+		parser := parser.New(lexer)
+		program := parser.ParseProgram()
 
-		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-			fmt.Fprintf(out, "%+v\n", tok)
+		if len(parser.Errors()) == 0 {
+			fmt.Fprintf(out, "%s\n", program.String())
+		} else {
+			for _, error := range parser.Errors() {
+				fmt.Fprintf(out, "ERROR: %s\n", error)
+			}
 		}
 	}
 }

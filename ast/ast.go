@@ -75,8 +75,8 @@ func (ss *SetStatement) String() string {
 
 	out.WriteString("Identifier Name: ")
 	out.WriteString(ss.Name.String())
-	out.WriteString(". Expression: ")
-	out.WriteString(ss.Value.String())
+	// out.WriteString(". Expression: ")
+	// out.WriteString(ss.Value.String())
 	out.WriteString(".")
 	return out.String()
 }

@@ -28,7 +28,7 @@ func TestCreateStatements(test *testing.T) {
 	l := lexer.New(input)
 	p := New(l)
 
-	program := p.parseProgram()
+	program := p.ParseProgram()
 	checkParserErrors(test, p)
 	if program == nil {
 		test.Fatalf("ParseProgram() returned nil")
@@ -89,7 +89,7 @@ func TestSetStatements(test *testing.T) {
 	l := lexer.New(input)
 	p := New(l)
 
-	program := p.parseProgram()
+	program := p.ParseProgram()
 	checkParserErrors(test, p)
 	if program == nil {
 		test.Fatalf("ParseProgram() returned nil")
