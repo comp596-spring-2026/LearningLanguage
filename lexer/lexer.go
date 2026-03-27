@@ -7,7 +7,7 @@ create int b;
 set b = 3;
 set a = 5;
 
-if a > b begin;
+if (a > b) begin;
 c = a - b; end;
 else begin;
 c = b - a; end;
@@ -28,7 +28,12 @@ LE
 EQ
 BEGIN
 END
+PLUS
 MINUS
+DIVIDE
+MULTIPLY
+LPAREN
+RPAREN
 */
 
 import (
