@@ -13,7 +13,7 @@ type Node interface {
 
 type Statement interface {
 	Node
-	statementNode()
+	StatementNode()
 }
 
 type Expression interface {
@@ -49,7 +49,7 @@ type CreateStatement struct {
 	Name  *Identifier
 }
 
-func (cs *CreateStatement) statementNode()       {}
+func (cs *CreateStatement) StatementNode()       {}
 func (cs *CreateStatement) TokenLiteral() string { return cs.Token.Literal }
 func (cs *CreateStatement) String() string {
 	var out bytes.Buffer
@@ -68,7 +68,7 @@ type SetStatement struct {
 	Value Expression
 }
 
-func (ss *SetStatement) statementNode()       {}
+func (ss *SetStatement) StatementNode()       {}
 func (ss *SetStatement) TokenLiteral() string { return ss.Token.Literal }
 func (ss *SetStatement) String() string {
 	var out bytes.Buffer
@@ -86,7 +86,7 @@ type Identifier struct {
 	Value string
 }
 
-func (i *Identifier) expressionNode()      {}
+func (i *Identifier) ExpressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string {
 	return i.Value
@@ -97,7 +97,7 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
-func (es *ExpressionStatement) statementNode()       {}
+func (es *ExpressionStatement) StatementNode()       {}
 func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
 func (es *ExpressionStatement) String() string {
 	return es.Expression.String()
