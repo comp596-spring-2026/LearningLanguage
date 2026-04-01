@@ -1,10 +1,30 @@
 package main
 
 import (
+	"fmt"
+	"learningLanguage/lexer"
+	"learningLanguage/parser"
 	"learningLanguage/repl"
 	"os"
 )
 
 func main() {
 	repl.Start(os.Stdin, os.Stdout)
+	// line := "set a = 3 * 3 + 2;"
+	// debug(line)
+}
+
+func debug(line string) {
+	out := os.Stdout
+	lexer := lexer.New(line)
+	parser := parser.New(lexer)
+	program := parser.ParseProgram()
+
+	if len(parser.Errors()) == 0 {
+		fmt.Fprintf(out, "%s\n", program.String())
+	} else {
+		for _, error := range parser.Errors() {
+			fmt.Fprintf(out, "ERROR: %s\n", error)
+		}
+	}
 }
