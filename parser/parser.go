@@ -261,7 +261,11 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
-	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	if !p.checkNextToken(token.SEMICOLON) {
+		return nil
+	}
+	return ident
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {

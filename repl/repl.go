@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"learningLanguage/evaluation"
 	"learningLanguage/lexer"
 	"learningLanguage/parser"
 )
@@ -21,13 +22,18 @@ func Start(in io.Reader, out io.Writer) {
 		lexer := lexer.New(line)
 		parser := parser.New(lexer)
 		program := parser.ParseProgram()
+		output, errors := evaluation.EvaluateProgram(program)
 
-		if len(parser.Errors()) == 0 {
-			fmt.Fprintf(out, "%s\n", program.String())
-		} else {
+		if len(parser.Errors()) > 0 {
 			for _, error := range parser.Errors() {
 				fmt.Fprintf(out, "ERROR: %s\n", error)
 			}
+		} else if len(errors) > 0 {
+			for _, error := range errors {
+				fmt.Fprintf(out, "ERROR: %s\n", error)
+			}
+		} else {
+			fmt.Fprintf(out, "%s\n", output)
 		}
 	}
 }
