@@ -6,6 +6,10 @@ create int a;
 create int b;
 set b = 3;
 set a = 5;
+set a = a * 1;
+set b = b / 5;
+set a = a - 1
+set b = b + 1
 
 if (a > b) begin;
 c = a - b; end;
@@ -128,6 +132,10 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.MULTIPLY, literal)
 		case '/':
 			tok = newToken(token.DIVIDE, literal)
+		case '(':
+			tok = newToken(token.LPAREN, literal)
+		case ')':
+			tok = newToken(token.RPAEREN, literal)
 		case 0:
 			tok.Literal = ""
 			tok.Type = token.EOF

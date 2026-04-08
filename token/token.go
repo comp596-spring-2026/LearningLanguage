@@ -6,6 +6,10 @@ create int a;
 create int b;
 set b = 3;
 set a = 5;
+set a = a * 1;
+set b = b / 5;
+set a = a - 1
+set b = b + 1
 
 if (a > b) begin;
 c = a - b; end;
