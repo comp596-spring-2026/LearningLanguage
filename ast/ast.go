@@ -81,17 +81,6 @@ func (ss *SetStatement) String() string {
 	return out.String()
 }
 
-type Identifier struct {
-	Token token.Token
-	Value string
-}
-
-func (i *Identifier) ExpressionNode()      {}
-func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
-func (i *Identifier) String() string {
-	return i.Value
-}
-
 type ExpressionStatement struct {
 	Token      token.Token
 	Expression Expression
@@ -101,6 +90,39 @@ func (es *ExpressionStatement) StatementNode()       {}
 func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
 func (es *ExpressionStatement) String() string {
 	return es.Expression.String()
+}
+
+type IfStatement struct {
+	Token     token.Token
+	Condition Expression
+	IfTrue    Statement
+	Else      Statement
+}
+
+func (is *IfStatement) StatementNode()       {}
+func (is *IfStatement) TokenLiteral() string { return is.Token.Literal }
+func (is *IfStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("if (")
+	out.WriteString(is.Condition.String())
+	out.WriteString("):\n")
+	out.WriteString(is.IfTrue.String())
+	out.WriteString("\nelse:\n")
+	out.WriteString(is.Else.String())
+
+	return out.String()
+}
+
+type Identifier struct {
+	Token token.Token
+	Value string
+}
+
+func (i *Identifier) ExpressionNode()      {}
+func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
+func (i *Identifier) String() string {
+	return i.Value
 }
 
 type IntegerLiteral struct {

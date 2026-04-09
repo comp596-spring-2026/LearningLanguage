@@ -151,6 +151,13 @@ func (p *Parser) parseStatement() ast.Statement {
 			return nil
 		}
 		return stmt
+
+	case token.IF:
+		stmt := p.parseIfStatement()
+		if stmt == nil {
+			return nil
+		}
+		return stmt
 	default:
 		stmt := p.parseExpressionStatement()
 		if stmt == nil {
@@ -236,6 +243,47 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	return statement
 }
 
+func (p *Parser) parseIfStatement() *ast.IfStatement {
+	statement := &ast.IfStatement{Token: p.curToken}
+
+	p.checkNextToken(token.LPAREN)
+
+	p.nextToken()
+	statement.Condition = p.parseExpression(LOWEST)
+
+	p.checkNextToken(token.RPAEREN)
+	p.checkNextToken(token.BEGIN)
+	p.checkNextToken(token.SEMICOLON)
+
+	for p.peekToken.Type != token.END {
+		p.nextToken()
+		statement.IfTrue = p.parseStatement()
+		if p.peekToken.Type == token.ELSE {
+			p.errors = append(p.errors, "ELSE found before END;")
+			return nil
+		}
+	}
+
+	p.checkNextToken(token.END)
+	p.checkNextToken(token.SEMICOLON)
+
+	if p.peekToken.Type != token.ELSE {
+		statement.Else = nil
+		return statement
+	} else {
+		p.nextToken()
+		p.checkNextToken(token.BEGIN)
+		p.checkNextToken(token.SEMICOLON)
+		p.nextToken()
+
+		statement.Else = p.parseStatement()
+
+		p.checkNextToken(token.END)
+		p.checkNextToken(token.SEMICOLON)
+		return statement
+	}
+}
+
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 	msg := fmt.Sprintf("no prefix parse function for %s found", t)
 	p.errors = append(p.errors, msg)
@@ -266,9 +314,6 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	if !p.checkNextToken(token.SEMICOLON) {
-		return nil
-	}
 	return ident
 }
 

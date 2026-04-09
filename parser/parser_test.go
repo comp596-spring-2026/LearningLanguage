@@ -147,6 +147,75 @@ func testSetStatement(test *testing.T, statement ast.Statement, name string, val
 	return true
 }
 
+func TestIfStatement(t *testing.T) {
+	input := `if (x) begin; 
+				set a = 1; end; 
+				else begin; 
+				set a = 0; end;`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.IfStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.IfStatement. got=%T",
+			program.Statements[0])
+	}
+
+	if stmt.TokenLiteral() != "if" {
+		t.Errorf("stmt.TokenLiteral not if. got=%s", stmt.TokenLiteral())
+	}
+
+	cond, ok := stmt.Condition.(*ast.Identifier)
+	if !ok {
+		t.Fatalf("stmt.Condition is not ast.Identifier. got=%T", stmt.Condition)
+	}
+
+	ifTrue, ok := stmt.IfTrue.(*ast.SetStatement)
+	if !ok {
+		t.Fatalf("stmt.IfTrue is not ast.SetStatement. got=%T", stmt.IfTrue)
+	}
+
+	els, ok := stmt.Else.(*ast.SetStatement)
+	if !ok {
+		t.Fatalf("stmt.Else is not ast.SetStatement. got=%T", stmt.Else)
+	}
+
+	if cond.Value != "x" {
+		t.Fatalf("cond.Value is not x. got=%s", cond.Value)
+	}
+
+	testIfSetStatement(t, ifTrue, "a", 1)
+
+	testIfSetStatement(t, els, "a", 0)
+}
+
+func testIfSetStatement(t *testing.T, stmt *ast.SetStatement, name string, value int64) {
+
+	if stmt.Name.Value != name {
+		t.Fatalf("stmt.Name.Value is not a. got=%s", stmt.Name.Value)
+		return
+	}
+
+	expression, ok := stmt.Value.(*ast.IntegerLiteral)
+	if !ok {
+		t.Fatalf("stmt.Value is not ast.IntegerLiteral. got=%T", stmt.Value)
+		return
+	}
+
+	if expression.Value != value {
+		t.Fatalf("expression.Value is not 1. got=%d", expression.Value)
+		return
+	}
+}
+
 func TestIdentifierExpression(t *testing.T) {
 	input := "foobar;"
 
