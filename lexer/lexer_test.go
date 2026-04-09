@@ -30,6 +30,8 @@ LESS
 GE
 LE
 EQ
+NEQ
+NOT
 BEGIN
 END
 PLUS
@@ -145,7 +147,7 @@ func TestLexerOperations(t *testing.T) {
 	}
 }
 
-func TestLExerFlowControl(t *testing.T) {
+func TestLexerFlowControl(t *testing.T) {
 	input := `if (a > b) begin;
 			a; end;
 			else begin;
@@ -173,6 +175,39 @@ func TestLExerFlowControl(t *testing.T) {
 		{token.SEMICOLON, ";"},
 		{token.END, "end"},
 		{token.SEMICOLON, ";"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
+				i, tt.expectedType, tok.Type)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
+func TestBooleans(t *testing.T) {
+	input := `!true false != > >= < <= ==`
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.NOT, "!"},
+		{token.TRUE, "true"},
+		{token.FALSE, "false"},
+		{token.NEQ, "!="},
+		{token.GT, ">"},
+		{token.GE, ">="},
+		{token.LT, "<"},
+		{token.LE, "<="},
+		{token.EQ, "=="},
 	}
 
 	l := New(input)

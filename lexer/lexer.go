@@ -30,6 +30,8 @@ LESS
 GE
 LE
 EQ
+NEQ
+NOT
 BEGIN
 END
 PLUS
@@ -45,7 +47,7 @@ import (
 	"slices"
 )
 
-var keywords = []string{"int", "create", "set", "if", "else", "begin", "end"}
+var keywords = []string{"int", "create", "set", "if", "else", "begin", "end", "true", "false"}
 
 type Lexer struct {
 	input string
@@ -121,6 +123,16 @@ func (l *Lexer) NextToken() token.Token {
 			} else {
 				l.goBack()
 				tok = newToken(token.LT, literal)
+			}
+		case '!':
+			temp := string(l.ch)
+			l.readChar()
+			if l.ch == '=' {
+				temp += string(l.ch)
+				tok = newToken(token.NEQ, temp)
+			} else {
+				l.goBack()
+				tok = newToken(token.NOT, literal)
 			}
 		case ';':
 			tok = newToken(token.SEMICOLON, literal)
@@ -211,6 +223,10 @@ func createKeyword(str string) token.Token {
 		tok = newToken(token.END, str)
 	case "int":
 		tok = newToken(token.INT, str)
+	case "true":
+		tok = newToken(token.TRUE, str)
+	case "false":
+		tok = newToken(token.FALSE, str)
 	}
 	return tok
 }

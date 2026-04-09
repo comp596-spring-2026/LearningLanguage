@@ -30,6 +30,8 @@ LESS
 GE
 LE
 EQ
+NEQ
+NOT
 BEGIN
 END
 PLUS
@@ -61,11 +63,13 @@ const (
 	DIVIDE   = "DIVIDE"
 	MULTIPLY = "MULTIPLY"
 
-	EQ = "EQUALTO"
-	GT = "GREATER"
-	GE = "GREQUAL"
-	LT = "LESS"
-	LE = "LEQUAL"
+	EQ  = "EQUALTO"
+	GT  = "GREATER"
+	GE  = "GREQUAL"
+	LT  = "LESS"
+	LE  = "LEQUAL"
+	NEQ = "NOTEQUAL"
+	NOT = "NOT"
 
 	LPAREN    = "LPAREN"
 	RPAEREN   = "RPAREN"
@@ -77,4 +81,6 @@ const (
 	ELSE   = "ELSE"
 	BEGIN  = "BEGIN"
 	END    = "END"
+	TRUE   = "TRUE"
+	FALSE  = "FALSE"
 )
