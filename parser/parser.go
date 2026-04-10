@@ -51,10 +51,12 @@ import (
 )
 
 const (
-	LOWEST     = iota + 1 // everything else
-	SUMDIFF               // + or -
-	PRODUCTDIV            // * or /
-	PREFIX                // -X
+	LOWEST      = iota + 1 // everything else
+	EQUALS                 // ==
+	LESSGREATER            // >, >=, <, <=
+	SUMDIFF                // + or -
+	PRODUCTDIV             // * or /
+	PREFIX                 // -X
 )
 
 var precedences = map[token.TokenType]int{
@@ -62,6 +64,12 @@ var precedences = map[token.TokenType]int{
 	token.MINUS:    SUMDIFF,
 	token.DIVIDE:   PRODUCTDIV,
 	token.MULTIPLY: PRODUCTDIV,
+	token.EQ:       EQUALS,
+	token.NEQ:      EQUALS,
+	token.GT:       LESSGREATER,
+	token.GE:       LESSGREATER,
+	token.LT:       LESSGREATER,
+	token.LE:       LESSGREATER,
 }
 
 type (
@@ -103,13 +111,22 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.NUMBER, p.parseIntegerLiteral)
+	p.registerPrefix(token.FALSE, p.parseBooleanLiteral)
+	p.registerPrefix(token.TRUE, p.parseBooleanLiteral)
+	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+	p.registerPrefix(token.NOT, p.parsePrefixExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
-	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.DIVIDE, p.parseInfixExpression)
 	p.registerInfix(token.MULTIPLY, p.parseInfixExpression)
+	p.registerInfix(token.GT, p.parseInfixExpression)
+	p.registerInfix(token.GE, p.parseInfixExpression)
+	p.registerInfix(token.LT, p.parseInfixExpression)
+	p.registerInfix(token.LE, p.parseInfixExpression)
+	p.registerInfix(token.EQ, p.parseInfixExpression)
+	p.registerInfix(token.NEQ, p.parseInfixExpression)
 
 	return p
 }
@@ -330,6 +347,23 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	}
 
 	lit.Value = value
+
+	return lit
+}
+
+func (p *Parser) parseBooleanLiteral() ast.Expression {
+	lit := &ast.BooleanLiteral{Token: p.curToken}
+
+	switch p.curToken.Literal {
+	case "false":
+		lit.Value = false
+	case "true":
+		lit.Value = true
+	default:
+		msg := fmt.Sprintf("could not parse %q as boolean", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
 
 	return lit
 }
