@@ -55,6 +55,7 @@ const (
 
 	IDENT  = "IDENT"
 	INT    = "INT"
+	BOOL   = "BOOL"
 	NUMBER = "NUMBER"
 
 	ASSIGN   = "ASSIGN"

@@ -47,6 +47,7 @@ import (
 	"learningLanguage/ast"
 	"learningLanguage/lexer"
 	"learningLanguage/token"
+	"slices"
 	"strconv"
 )
 
@@ -187,18 +188,18 @@ func (p *Parser) parseStatement() ast.Statement {
 
 }
 
-func (p *Parser) checkNextToken(tokType token.TokenType) bool {
-	if p.peekToken.Type == tokType {
+func (p *Parser) checkNextToken(tokTypes []token.TokenType) bool {
+	if slices.Contains(tokTypes, p.peekToken.Type) {
 		p.nextToken()
 		return true
 	} else {
-		p.peekError(tokType)
+		p.peekError(tokTypes)
 		return false
 	}
 }
 
-func (p *Parser) peekError(tokType token.TokenType) {
-	msg := fmt.Sprintf("Expected next token to be %s, received %s.", tokType, p.peekToken.Type)
+func (p *Parser) peekError(tokTypes []token.TokenType) {
+	msg := fmt.Sprintf("Expected next token to be %v, received %s.", tokTypes, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }
 
@@ -207,18 +208,25 @@ func (p *Parser) parseCreateStatement() *ast.CreateStatement {
 	statement := &ast.CreateStatement{Token: p.curToken}
 
 	//DATATYPE
-	if !p.checkNextToken(token.INT) { //TODO: add other datatypes
+	if !p.checkNextToken([]token.TokenType{token.INT, token.BOOL}) { //TODO: add other datatypes
 		return nil
 	}
 
+	switch p.curToken.Type {
+	case token.INT:
+		statement.DataType = "int"
+	case token.BOOL:
+		statement.DataType = "bool"
+	}
+
 	//IDENT
-	if !p.checkNextToken(token.IDENT) {
+	if !p.checkNextToken([]token.TokenType{token.IDENT}) {
 		return nil
 	}
 	statement.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
 	//SEMICOLON
-	if !p.checkNextToken(token.SEMICOLON) {
+	if !p.checkNextToken([]token.TokenType{token.SEMICOLON}) {
 		return nil
 	}
 
@@ -230,12 +238,12 @@ func (p *Parser) parseSetStatement() *ast.SetStatement {
 	statement := &ast.SetStatement{Token: p.curToken}
 
 	//IDENT
-	if !p.checkNextToken(token.IDENT) {
+	if !p.checkNextToken([]token.TokenType{token.IDENT}) {
 		return nil
 	}
 	statement.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
-	if !p.checkNextToken(token.ASSIGN) {
+	if !p.checkNextToken([]token.TokenType{token.ASSIGN}) {
 		return nil
 	}
 
@@ -243,7 +251,7 @@ func (p *Parser) parseSetStatement() *ast.SetStatement {
 
 	statement.Value = p.parseExpression(LOWEST)
 
-	if !p.checkNextToken(token.SEMICOLON) {
+	if !p.checkNextToken([]token.TokenType{token.SEMICOLON}) {
 		return nil
 	}
 
@@ -265,14 +273,14 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 func (p *Parser) parseIfStatement() *ast.IfStatement {
 	statement := &ast.IfStatement{Token: p.curToken}
 
-	p.checkNextToken(token.LPAREN)
+	p.checkNextToken([]token.TokenType{token.LPAREN})
 
 	p.nextToken()
 	statement.Condition = p.parseExpression(LOWEST)
 
-	p.checkNextToken(token.RPAEREN)
-	p.checkNextToken(token.BEGIN)
-	p.checkNextToken(token.SEMICOLON)
+	p.checkNextToken([]token.TokenType{token.RPAEREN})
+	p.checkNextToken([]token.TokenType{token.BEGIN})
+	p.checkNextToken([]token.TokenType{token.SEMICOLON})
 
 	for p.peekToken.Type != token.END {
 		p.nextToken()
@@ -283,22 +291,22 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 		}
 	}
 
-	p.checkNextToken(token.END)
-	p.checkNextToken(token.SEMICOLON)
+	p.checkNextToken([]token.TokenType{token.END})
+	p.checkNextToken([]token.TokenType{token.SEMICOLON})
 
 	if p.peekToken.Type != token.ELSE {
 		statement.Else = nil
 		return statement
 	} else {
 		p.nextToken()
-		p.checkNextToken(token.BEGIN)
-		p.checkNextToken(token.SEMICOLON)
+		p.checkNextToken([]token.TokenType{token.BEGIN})
+		p.checkNextToken([]token.TokenType{token.SEMICOLON})
 		p.nextToken()
 
 		statement.Else = p.parseStatement()
 
-		p.checkNextToken(token.END)
-		p.checkNextToken(token.SEMICOLON)
+		p.checkNextToken([]token.TokenType{token.END})
+		p.checkNextToken([]token.TokenType{token.SEMICOLON})
 		return statement
 	}
 }

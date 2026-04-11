@@ -45,8 +45,9 @@ func (p *Program) String() string {
 
 // Variable Creation Statement
 type CreateStatement struct {
-	Token token.Token
-	Name  *Identifier
+	Token    token.Token
+	Name     *Identifier
+	DataType string
 }
 
 func (cs *CreateStatement) StatementNode()       {}
@@ -56,6 +57,8 @@ func (cs *CreateStatement) String() string {
 
 	out.WriteString("Identifier Name: ")
 	out.WriteString(cs.Name.String())
+	out.WriteString(". Data Type: ")
+	out.WriteString(cs.DataType)
 	out.WriteString(".")
 
 	return out.String()

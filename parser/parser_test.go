@@ -23,7 +23,7 @@ func checkParserErrors(test *testing.T, p *Parser) {
 func TestCreateStatements(test *testing.T) {
 	input := `
 	create int x; 
-	create int y; 
+	create bool y; 
 	create int z;`
 
 	l := lexer.New(input)
@@ -41,21 +41,22 @@ func TestCreateStatements(test *testing.T) {
 
 	tests := []struct {
 		expectedIdentifier string
+		expectedDataType   string
 	}{
-		{"x"},
-		{"y"},
-		{"z"},
+		{"x", "int"},
+		{"y", "bool"},
+		{"z", "int"},
 	}
 
 	for i, tt := range tests {
 		stmt := program.Statements[i]
-		if !testCreateStatement(test, stmt, tt.expectedIdentifier) {
+		if !testCreateStatement(test, stmt, tt.expectedIdentifier, tt.expectedDataType) {
 			return
 		}
 	}
 }
 
-func testCreateStatement(test *testing.T, statement ast.Statement, name string) bool {
+func testCreateStatement(test *testing.T, statement ast.Statement, name string, dataType string) bool {
 	if statement.TokenLiteral() != "create" {
 		test.Errorf("s.TokenLiteral not 'let'. got=%q", statement.TokenLiteral())
 		return false
@@ -68,13 +69,18 @@ func testCreateStatement(test *testing.T, statement ast.Statement, name string) 
 	}
 
 	if createStmt.Name.Value != name {
-		test.Errorf("letStmt.Name.Value not '%s'. got=%s", name, createStmt.Name.Value)
+		test.Errorf("createStmt.Name.Value not '%s'. got=%s", name, createStmt.Name.Value)
 		return false
 	}
 
 	if createStmt.Name.TokenLiteral() != name {
-		test.Errorf("letStmt.Name.TokenLiteral() not '%s'. got=%s",
+		test.Errorf("createStmt.Name.TokenLiteral() not '%s'. got=%s",
 			name, createStmt.Name.TokenLiteral())
+		return false
+	}
+
+	if createStmt.DataType != dataType {
+		test.Errorf("createStmt.DataType not '%s'. got %s", dataType, createStmt.DataType)
 		return false
 	}
 

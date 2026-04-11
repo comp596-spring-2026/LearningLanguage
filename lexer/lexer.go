@@ -47,7 +47,7 @@ import (
 	"slices"
 )
 
-var keywords = []string{"int", "create", "set", "if", "else", "begin", "end", "true", "false"}
+var keywords = []string{"int", "bool", "create", "set", "if", "else", "begin", "end", "true", "false"}
 
 type Lexer struct {
 	input string
@@ -227,6 +227,8 @@ func createKeyword(str string) token.Token {
 		tok = newToken(token.TRUE, str)
 	case "false":
 		tok = newToken(token.FALSE, str)
+	case "bool":
+		tok = newToken(token.BOOL, str)
 	}
 	return tok
 }
