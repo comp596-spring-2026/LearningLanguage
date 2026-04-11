@@ -7,7 +7,24 @@ import (
 	"strconv"
 )
 
-var variableMap = make(map[string]int64)
+const (
+	INTTYPE = iota
+	BOOLTYPE
+	STRINGTYPE
+)
+
+type Data struct {
+	dataType    int
+	intValue    int64
+	boolValue   bool
+	stringValue string
+}
+
+var variableTypes = map[string]int{
+	"int":  INTTYPE,
+	"bool": BOOLTYPE,
+}
+var variableMap = make(map[string]Data)
 var errors []string
 
 func EvaluateProgram(program *ast.Program) (string, []string) {
@@ -35,14 +52,19 @@ func evaluateStatement(statement ast.Statement) string {
 	exprStmt, ok := statement.(*ast.ExpressionStatement)
 	if ok {
 		value := evaluateExpression(exprStmt.Expression)
-		output = strconv.FormatInt(value, 10)
+		switch value.dataType {
+		case INTTYPE:
+			output = strconv.FormatInt(value.intValue, 10)
+		case BOOLTYPE:
+			output = strconv.FormatBool(value.boolValue)
+		}
 	}
 
 	return output
 }
 
 func evaluateCreateStatement(statement *ast.CreateStatement) string {
-	variableMap[statement.Name.Value] = 0
+	variableMap[statement.Name.Value] = Data{dataType: variableTypes[statement.DataType]}
 	return ""
 }
 
@@ -56,12 +78,17 @@ func evaluateSetStatement(statement *ast.SetStatement) string {
 	return ""
 }
 
-func evaluateExpression(expression ast.Expression) int64 {
-	var value int64
+func evaluateExpression(expression ast.Expression) Data {
+	var value Data
 
 	intLit, ok := expression.(*ast.IntegerLiteral)
 	if ok {
 		value = evaluateIntLit(intLit)
+	}
+
+	boolLit, ok := expression.(*ast.BooleanLiteral)
+	if ok {
+		value = evaluateBoolLit(boolLit)
 	}
 
 	identifierExp, ok := expression.(*ast.Identifier)
@@ -82,42 +109,103 @@ func evaluateExpression(expression ast.Expression) int64 {
 	return value
 }
 
-func evaluateIntLit(expression *ast.IntegerLiteral) int64 {
-	return expression.Value
+func evaluateIntLit(expression *ast.IntegerLiteral) Data {
+	return Data{dataType: INTTYPE, intValue: expression.Value}
 }
 
-func evaluateIdentifier(identifier *ast.Identifier) int64 {
+func evaluateBoolLit(expression *ast.BooleanLiteral) Data {
+	return Data{dataType: BOOLTYPE, boolValue: expression.Value}
+
+}
+
+func evaluateIdentifier(identifier *ast.Identifier) Data {
 	value, ok := variableMap[identifier.Value]
 	if !ok {
 		errors = append(errors, fmt.Sprintf("Variable %s does not exist.", identifier.Value))
-		return 0
+		return Data{}
 	}
+
 	return value
 }
 
-func evaluatePrefixExp(expression *ast.PrefixExpression) int64 {
+func evaluatePrefixExp(expression *ast.PrefixExpression) Data {
 	value := evaluateExpression(expression.Right)
-	if expression.Operator == "-" {
-		value = -1 * value
+	switch expression.Operator {
+	case "-":
+		value.intValue = -1 * value.intValue
+	case "!":
+		value.boolValue = !value.boolValue
 	}
 
 	return value
 }
 
-func evaluateInfixExp(expression *ast.InfixExpression) int64 {
+func evaluateInfixExp(expression *ast.InfixExpression) Data {
 	leftValue := evaluateExpression(expression.Left)
 	rightValue := evaluateExpression(expression.Right)
+	if leftValue.dataType != rightValue.dataType {
+		errors = append(errors, "Mismatching datatypes error")
+		return Data{}
+	}
+	var retValue Data
 
 	switch expression.Operator {
 	case "+":
-		return leftValue + rightValue
+		retValue.dataType = INTTYPE
+		retValue.intValue = leftValue.intValue + rightValue.intValue
 	case "-":
-		return leftValue - rightValue
+		retValue.dataType = INTTYPE
+		retValue.intValue = leftValue.intValue - rightValue.intValue
 	case "*":
-		return leftValue * rightValue
+		retValue.dataType = INTTYPE
+		retValue.intValue = leftValue.intValue * rightValue.intValue
 	case "/":
-		return leftValue / rightValue
-	default:
-		return 0
+		retValue.dataType = INTTYPE
+		retValue.intValue = leftValue.intValue / rightValue.intValue
+	case "==":
+		retValue.dataType = BOOLTYPE
+		switch leftValue.dataType {
+		case BOOLTYPE:
+			retValue.boolValue = leftValue.boolValue == rightValue.boolValue
+		case INTTYPE:
+			retValue.boolValue = leftValue.intValue == rightValue.intValue
+		}
+	case "!=":
+		retValue.dataType = BOOLTYPE
+		switch leftValue.dataType {
+		case BOOLTYPE:
+			retValue.boolValue = leftValue.boolValue != rightValue.boolValue
+		case INTTYPE:
+			retValue.boolValue = leftValue.intValue != rightValue.intValue
+		}
+	case ">":
+		retValue.dataType = BOOLTYPE
+		if leftValue.dataType != INTTYPE && rightValue.dataType != INTTYPE {
+			errors = append(errors, "Cannot perform perform quanitative comparisons with non-integers.")
+			return Data{}
+		}
+		retValue.boolValue = leftValue.intValue > retValue.intValue
+	case ">=":
+		retValue.dataType = BOOLTYPE
+		if leftValue.dataType != INTTYPE && rightValue.dataType != INTTYPE {
+			errors = append(errors, "Cannot perform perform quanitative comparisons with non-integers.")
+			return Data{}
+		}
+		retValue.boolValue = leftValue.intValue >= retValue.intValue
+	case "<":
+		retValue.dataType = BOOLTYPE
+		if leftValue.dataType != INTTYPE && rightValue.dataType != INTTYPE {
+			errors = append(errors, "Cannot perform perform quanitative comparisons with non-integers.")
+			return Data{}
+		}
+		retValue.boolValue = leftValue.intValue < retValue.intValue
+	case "<=":
+		retValue.dataType = BOOLTYPE
+		if leftValue.dataType != INTTYPE && rightValue.dataType != INTTYPE {
+			errors = append(errors, "Cannot perform perform quanitative comparisons with non-integers.")
+			return Data{}
+		}
+		retValue.boolValue = leftValue.intValue <= retValue.intValue
 	}
+	return retValue
 }

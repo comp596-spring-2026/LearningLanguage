@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"learningLanguage/evaluation"
 	"learningLanguage/lexer"
 	"learningLanguage/parser"
 	"learningLanguage/repl"
@@ -9,8 +10,6 @@ import (
 )
 
 func main() {
-	files := os.Args[2]
-	print(files)
 	switch os.Args[1] {
 	case "lex":
 		repl.StartRLPL(os.Stdin, os.Stdout)
@@ -19,21 +18,25 @@ func main() {
 	case "eval":
 		repl.StartREPL(os.Stdin, os.Stdout)
 	}
-	// line := "set a = 3 * 3 + 2;"
+	// line := "create bool x; set x = true; x == false;"
 	// debug(line)
 }
 
 func debug(line string) {
-	out := os.Stdout
 	lexer := lexer.New(line)
 	parser := parser.New(lexer)
 	program := parser.ParseProgram()
+	output, errors := evaluation.EvaluateProgram(program)
 
-	if len(parser.Errors()) == 0 {
-		fmt.Fprintf(out, "%s\n", program.String())
-	} else {
+	if len(parser.Errors()) > 0 {
 		for _, error := range parser.Errors() {
-			fmt.Fprintf(out, "ERROR: %s\n", error)
+			fmt.Fprintf(os.Stdout, "ERROR: %s\n", error)
 		}
+	} else if len(errors) > 0 {
+		for _, error := range errors {
+			fmt.Fprintf(os.Stdout, "ERROR: %s\n", error)
+		}
+	} else {
+		fmt.Fprintf(os.Stdout, "%s\n", output)
 	}
 }
