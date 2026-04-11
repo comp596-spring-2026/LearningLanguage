@@ -49,6 +49,11 @@ func evaluateStatement(statement ast.Statement) string {
 		output = evaluateSetStatement(setStmt)
 	}
 
+	ifStmt, ok := statement.(*ast.IfStatement)
+	if ok {
+		output = evaluateIfStatement(ifStmt)
+	}
+
 	exprStmt, ok := statement.(*ast.ExpressionStatement)
 	if ok {
 		value := evaluateExpression(exprStmt.Expression)
@@ -76,6 +81,20 @@ func evaluateSetStatement(statement *ast.SetStatement) string {
 	}
 	variableMap[statement.Name.Value] = evaluateExpression(statement.Value)
 	return ""
+}
+
+func evaluateIfStatement(statement *ast.IfStatement) string {
+	conditionData := evaluateExpression(statement.Condition)
+	if conditionData.dataType != BOOLTYPE {
+		errors = append(errors, "Cannot use non-boolean expression in if statement condition.")
+		return ""
+	} else {
+		if conditionData.boolValue {
+			return evaluateStatement(statement.IfTrue)
+		} else {
+			return evaluateStatement(statement.Else)
+		}
+	}
 }
 
 func evaluateExpression(expression ast.Expression) Data {

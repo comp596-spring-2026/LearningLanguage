@@ -18,7 +18,7 @@ func main() {
 	case "eval":
 		repl.StartREPL(os.Stdin, os.Stdout)
 	}
-	// line := "create bool x; set x = true; x == false;"
+	// line := "if (1 != 1) begin; 123; end; else begin; 321; end;"
 	// debug(line)
 }
 
