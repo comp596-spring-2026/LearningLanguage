@@ -1,5 +1,7 @@
 package repl
 
+// READ EVALUATE PRINT LOOP
+
 import (
 	"bufio"
 	"fmt"
@@ -7,9 +9,10 @@ import (
 	"learningLanguage/evaluation"
 	"learningLanguage/lexer"
 	"learningLanguage/parser"
+	"learningLanguage/token"
 )
 
-func Start(in io.Reader, out io.Writer) {
+func StartREPL(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	for {
 		fmt.Fprintf(out, ">> ")
@@ -34,6 +37,51 @@ func Start(in io.Reader, out io.Writer) {
 			}
 		} else {
 			fmt.Fprintf(out, "%s\n", output)
+		}
+	}
+}
+
+func StartRLPL(in io.Reader, out io.Writer) {
+	scanner := bufio.NewScanner(in)
+
+	for {
+		fmt.Fprintf(out, ">> ")
+		scanned := scanner.Scan()
+		if !scanned {
+			return
+		}
+
+		line := scanner.Text()
+		lexer := lexer.New(line)
+		tok := lexer.NextToken()
+
+		for tok.Type != token.EOF {
+			fmt.Fprintf(out, "%+v\n", tok)
+			tok = lexer.NextToken()
+		}
+	}
+}
+
+func StartRPPL(in io.Reader, out io.Writer) {
+	scanner := bufio.NewScanner(in)
+	for {
+		fmt.Fprintf(out, ">> ")
+		scanned := scanner.Scan()
+		if !scanned {
+			return
+		}
+
+		line := scanner.Text()
+		lexer := lexer.New(line)
+		parser := parser.New(lexer)
+		program := parser.ParseProgram()
+
+		if len(parser.Errors()) > 0 {
+			for _, error := range parser.Errors() {
+				fmt.Fprintf(out, "ERROR: %s\n", error)
+			}
+		} else {
+			fmt.Fprintf(out, "%s\n", program.String())
 		}
 	}
 }

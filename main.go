@@ -9,7 +9,16 @@ import (
 )
 
 func main() {
-	repl.Start(os.Stdin, os.Stdout)
+	files := os.Args[2]
+	print(files)
+	switch os.Args[1] {
+	case "lex":
+		repl.StartRLPL(os.Stdin, os.Stdout)
+	case "parse":
+		repl.StartRPPL(os.Stdin, os.Stdout)
+	case "eval":
+		repl.StartREPL(os.Stdin, os.Stdout)
+	}
 	// line := "set a = 3 * 3 + 2;"
 	// debug(line)
 }
