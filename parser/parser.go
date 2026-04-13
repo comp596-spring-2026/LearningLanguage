@@ -1,45 +1,25 @@
 package parser
 
 /*
-Language subset currently being worked on:
-create int a;
-create int b;
-set b = 3;
-set a = 5;
-set a = a * 1;
-set b = b / 5;
-set a = a - 1
-set b = b + 1
+Language feature currently being worked on:
+struct myStruct(
+	int a,
+	bool b
+) [a: 123, b: true];
 
-if (a > b) begin;
-c = a - b; end;
-else begin;
-c = b - a; end;
+OR
+
+struct myStruct(int a, bool b);
+myStruct.a = 123;
+myStruct.b = true;
 
 Tokens:
-CREATE
-SET
-INT
-IDENTIFIER
-EQUAL
-NUMBER
-SEMICOLON
-IF
-GREATER
-LESS
-GE
-LE
-EQ
-NEQ
-NOT
-BEGIN
-END
-PLUS
-MINUS
-DIVIDE
-MULTIPLY
-LPAREN
-RPAREN
+STRUCT
+COMMA
+COLON
+DOT
+LBRACKET
+RBRACKET
 */
 
 import (
