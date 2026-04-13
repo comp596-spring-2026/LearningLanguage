@@ -273,8 +273,8 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 
 	statement.Expression = p.parseExpression(LOWEST)
 
-	if p.peekToken.Type == token.SEMICOLON {
-		p.nextToken()
+	if !p.checkNextToken(token.SEMICOLON) {
+		return nil
 	}
 
 	return statement

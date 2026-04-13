@@ -5,17 +5,17 @@ package repl
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"learningLanguage/evaluation"
 	"learningLanguage/lexer"
 	"learningLanguage/parser"
 	"learningLanguage/token"
+	"os"
 )
 
-func StartREPL(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
+func StartREPL() {
+	scanner := bufio.NewScanner(os.Stdin)
 	for {
-		fmt.Fprintf(out, ">> ")
+		fmt.Printf(">> ")
 		scanned := scanner.Scan()
 		if !scanned {
 			return
@@ -29,23 +29,23 @@ func StartREPL(in io.Reader, out io.Writer) {
 
 		if len(parser.Errors()) > 0 {
 			for _, error := range parser.Errors() {
-				fmt.Fprintf(out, "ERROR: %s\n", error)
+				fmt.Printf("ERROR: %s\n", error)
 			}
 		} else if len(errors) > 0 {
 			for _, error := range errors {
-				fmt.Fprintf(out, "ERROR: %s\n", error)
+				fmt.Printf("ERROR: %s\n", error)
 			}
 		} else {
-			fmt.Fprintf(out, "%s\n", output)
+			fmt.Printf("%s\n", output)
 		}
 	}
 }
 
-func StartRLPL(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
+func StartRLPL() {
+	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Fprintf(out, ">> ")
+		fmt.Printf(">> ")
 		scanned := scanner.Scan()
 		if !scanned {
 			return
@@ -56,16 +56,16 @@ func StartRLPL(in io.Reader, out io.Writer) {
 		tok := lexer.NextToken()
 
 		for tok.Type != token.EOF {
-			fmt.Fprintf(out, "%+v\n", tok)
+			fmt.Printf("%+v\n", tok)
 			tok = lexer.NextToken()
 		}
 	}
 }
 
-func StartRPPL(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
+func StartRPPL() {
+	scanner := bufio.NewScanner(os.Stdin)
 	for {
-		fmt.Fprintf(out, ">> ")
+		fmt.Printf(">> ")
 		scanned := scanner.Scan()
 		if !scanned {
 			return
@@ -78,10 +78,10 @@ func StartRPPL(in io.Reader, out io.Writer) {
 
 		if len(parser.Errors()) > 0 {
 			for _, error := range parser.Errors() {
-				fmt.Fprintf(out, "ERROR: %s\n", error)
+				fmt.Printf("ERROR: %s\n", error)
 			}
 		} else {
-			fmt.Fprintf(out, "%s\n", program.String())
+			fmt.Printf("%s\n", program.String())
 		}
 	}
 }

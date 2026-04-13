@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"learningLanguage/evaluation"
 	"learningLanguage/lexer"
 	"learningLanguage/parser"
@@ -10,16 +11,52 @@ import (
 )
 
 func main() {
-	switch os.Args[1] {
-	case "lex":
-		repl.StartRLPL(os.Stdin, os.Stdout)
-	case "parse":
-		repl.StartRPPL(os.Stdin, os.Stdout)
-	case "eval":
-		repl.StartREPL(os.Stdin, os.Stdout)
+	if len(os.Args) == 1 {
+		repl.StartREPL()
+	} else {
+		inFile := os.Stdin
+		outFile := os.Stdout
+		index := 1
+		for index < len(os.Args) {
+			switch os.Args[index] {
+			case "-i":
+				index++
+				inFile, _ = os.Open(os.Args[index])
+			case "-o":
+				index++
+				outFile, _ = os.OpenFile(os.Args[index], os.O_WRONLY|os.O_CREATE, 0600)
+			default:
+				index++
+			}
+		}
+		executeProgram(inFile, outFile)
+		inFile.Close()
+		outFile.Close()
 	}
 	// line := "if (1 != 1) begin; 123; end; else begin; 321; end;"
 	// debug(line)
+}
+
+func executeProgram(in io.Reader, out io.Writer) {
+	text, err := io.ReadAll(in)
+	if err != nil {
+		panic(err)
+	}
+
+	lexer := lexer.New(string(text))
+	parser := parser.New(lexer)
+	program := parser.ParseProgram()
+	output, errors := evaluation.EvaluateProgram(program)
+
+	if len(errors) == 0 {
+		fmt.Fprint(out, output)
+		fmt.Println(output)
+	} else {
+		for _, err := range errors {
+			fmt.Fprint(out, err)
+			fmt.Println(err)
+		}
+	}
 }
 
 func debug(line string) {
