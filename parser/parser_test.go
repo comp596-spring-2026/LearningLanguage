@@ -275,6 +275,75 @@ func TestStructStatement(t *testing.T) {
 	testBooleanLiteral(t, bBool, true)
 }
 
+func TestAttributeSetStatement(t *testing.T) {
+	input := "set myStruct.a = 123;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.SetStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.IfStatement. got=%T",
+			program.Statements[0])
+	}
+
+	if stmt.Name.Value != "myStruct" {
+		t.Fatalf("Expected struct name myStruct, got %s", stmt.Name.Value)
+	}
+
+	if stmt.Name.Attribute != "a" {
+		t.Fatalf("Expected struct attrubute a, got %s", stmt.Name.Attribute)
+	}
+
+	intLit, ok := stmt.Value.(*ast.IntegerLiteral)
+	if !ok {
+		t.Fatalf("stmt.Value is not ast.IntLiteral. got=%T",
+			stmt.Value)
+	}
+
+	testIntegerLiteral(t, intLit, 123)
+}
+
+func TestAttributeIdentifier(t *testing.T) {
+	input := "myStruct.a;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	ident, ok := stmt.Expression.(*ast.Identifier)
+	if !ok {
+		t.Fatalf("exp not *ast.Identifier. got=%T", stmt.Expression)
+	}
+
+	if ident.Value != "myStruct" {
+		t.Fatalf("Struct identifier not myStruct, got %s", ident.Value)
+	}
+
+	if ident.Attribute != "a" {
+		t.Fatalf("Struct attribute not a, got %s", ident.Attribute)
+	}
+}
+
 func TestIdentifierExpression(t *testing.T) {
 	input := "foobar;"
 

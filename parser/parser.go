@@ -245,6 +245,14 @@ func (p *Parser) parseSetStatement() *ast.SetStatement {
 	}
 	statement.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
+	if p.peekToken.Type == token.DOT {
+		p.checkNextToken(token.DOT)
+		if !p.checkNextToken(token.IDENT) {
+			return nil
+		}
+		statement.Name.Attribute = p.curToken.Literal
+	}
+
 	if !p.checkNextToken(token.ASSIGN) {
 		return nil
 	}
@@ -275,14 +283,22 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 func (p *Parser) parseIfStatement() *ast.IfStatement {
 	statement := &ast.IfStatement{Token: p.curToken}
 
-	p.checkNextToken(token.LPAREN)
+	if !p.checkNextToken(token.LPAREN) {
+		return nil
+	}
 
 	p.nextToken()
 	statement.Condition = p.parseExpression(LOWEST)
 
-	p.checkNextToken(token.RPAEREN)
-	p.checkNextToken(token.BEGIN)
-	p.checkNextToken(token.SEMICOLON)
+	if !p.checkNextToken(token.RPAEREN) {
+		return nil
+	}
+	if !p.checkNextToken(token.BEGIN) {
+		return nil
+	}
+	if !p.checkNextToken(token.SEMICOLON) {
+		return nil
+	}
 
 	for p.peekToken.Type != token.END {
 		p.nextToken()
@@ -293,22 +309,34 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 		}
 	}
 
-	p.checkNextToken(token.END)
-	p.checkNextToken(token.SEMICOLON)
+	if !p.checkNextToken(token.END) {
+		return nil
+	}
+	if !p.checkNextToken(token.SEMICOLON) {
+		return nil
+	}
 
 	if p.peekToken.Type != token.ELSE {
 		statement.Else = nil
 		return statement
 	} else {
 		p.nextToken()
-		p.checkNextToken(token.BEGIN)
-		p.checkNextToken(token.SEMICOLON)
+		if !p.checkNextToken(token.BEGIN) {
+			return nil
+		}
+		if !p.checkNextToken(token.SEMICOLON) {
+			return nil
+		}
 		p.nextToken()
 
 		statement.Else = p.parseStatement()
 
-		p.checkNextToken(token.END)
-		p.checkNextToken(token.SEMICOLON)
+		if !p.checkNextToken(token.END) {
+			return nil
+		}
+		if !p.checkNextToken(token.SEMICOLON) {
+			return nil
+		}
 		return statement
 	}
 }
@@ -316,42 +344,70 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 func (p *Parser) parseStructStatement() *ast.StructStatement {
 	statement := &ast.StructStatement{Token: p.curToken, Values: make(map[string]ast.Expression)}
 
-	p.checkNextToken(token.IDENT)
+	if !p.checkNextToken(token.IDENT) {
+		return nil
+	}
 	statement.StructIdent = ast.Identifier{Token: p.curToken, Value: p.curToken.Literal, DataType: "struct"}
 
-	p.checkNextToken(token.LPAREN)
-	p.checkMultipleNextToken([]token.TokenType{token.BOOL, token.INT})
-	p.checkNextToken(token.IDENT)
+	if !p.checkNextToken(token.LPAREN) {
+		return nil
+	}
+	if !p.checkMultipleNextToken([]token.TokenType{token.BOOL, token.INT}) {
+		return nil
+	}
+	if !p.checkNextToken(token.IDENT) {
+		return nil
+	}
 	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	statement.Attributes = append(statement.Attributes, *ident)
 
 	for p.peekToken.Type == token.COMMA {
 		p.checkNextToken(token.COMMA)
-		p.checkMultipleNextToken([]token.TokenType{token.BOOL, token.INT})
-		p.checkNextToken(token.IDENT)
+		if !p.checkMultipleNextToken([]token.TokenType{token.BOOL, token.INT}) {
+			return nil
+		}
+		if !p.checkNextToken(token.IDENT) {
+			return nil
+		}
 		ident = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		statement.Attributes = append(statement.Attributes, *ident)
 	}
-	p.checkNextToken(token.RPAEREN)
+	if !p.checkNextToken(token.RPAEREN) {
+		return nil
+	}
 
-	p.checkNextToken(token.LBRACKET)
-	p.checkNextToken(token.IDENT)
+	if !p.checkNextToken(token.LBRACKET) {
+		return nil
+	}
+	if !p.checkNextToken(token.IDENT) {
+		return nil
+	}
 	identString := p.curToken.Literal
-	p.checkNextToken(token.COLON)
+	if !p.checkNextToken(token.COLON) {
+		return nil
+	}
 	p.nextToken()
 	statement.Values[identString] = p.parseExpression(LOWEST)
 
 	for p.peekToken.Type == token.COMMA {
 		p.checkNextToken(token.COMMA)
-		p.checkNextToken(token.IDENT)
+		if !p.checkNextToken(token.IDENT) {
+			return nil
+		}
 		identString := p.curToken.Literal
-		p.checkNextToken(token.COLON)
+		if !p.checkNextToken(token.COLON) {
+			return nil
+		}
 		p.nextToken()
 		statement.Values[identString] = p.parseExpression(LOWEST)
 	}
 
-	p.checkNextToken(token.RBRACKET)
-	p.checkNextToken(token.SEMICOLON)
+	if !p.checkNextToken(token.RBRACKET) {
+		return nil
+	}
+	if !p.checkNextToken(token.SEMICOLON) {
+		return nil
+	}
 
 	return statement
 }
@@ -386,6 +442,13 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	if p.peekToken.Type == token.DOT {
+		p.checkNextToken(token.DOT)
+		if !p.checkNextToken(token.IDENT) {
+			return nil
+		}
+		ident.Attribute = p.curToken.Literal
+	}
 	return ident
 }
 

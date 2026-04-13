@@ -134,33 +134,11 @@ func (ss *StructStatement) String() string {
 	return out.String()
 }
 
-type AttributeAssignStatement struct {
-	Token       token.Token
-	StructIdent Identifier
-	Attribute   Identifier
-	Value       Expression
-}
-
-func (aas AttributeAssignStatement) StatementNode()       {}
-func (aas AttributeAssignStatement) TokenLiteral() string { return aas.Token.Literal }
-func (aas AttributeAssignStatement) String() string {
-	var out bytes.Buffer
-
-	out.WriteString("Struct: ")
-	out.WriteString(aas.StructIdent.String())
-	out.WriteString(". Attribute: ")
-	out.WriteString(aas.Attribute.String())
-	out.WriteString(". Value: ")
-	out.WriteString(aas.Value.String())
-	out.WriteString(".")
-
-	return out.String()
-}
-
 type Identifier struct {
-	Token    token.Token
-	Value    string
-	DataType string
+	Token     token.Token
+	Value     string
+	DataType  string
+	Attribute string
 }
 
 func (i *Identifier) ExpressionNode()      {}
