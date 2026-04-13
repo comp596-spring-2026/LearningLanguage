@@ -117,6 +117,51 @@ func (is *IfStatement) String() string {
 	return out.String()
 }
 
+type StructStatement struct {
+	Token      token.Token
+	Attributes []Identifier
+	Values     map[Identifier]Expression
+}
+
+func (ss *StructStatement) StatementNode()       {}
+func (ss *StructStatement) TokenLiteral() string { return ss.Token.Literal }
+func (ss *StructStatement) String() string {
+	var out bytes.Buffer
+
+	for _, attribute := range ss.Attributes {
+		out.WriteString("Attribute: ")
+		out.WriteString(attribute.String())
+		out.WriteString(". Value: ")
+		out.WriteString(ss.Values[attribute].String())
+		out.WriteString(".")
+	}
+
+	return out.String()
+}
+
+type AttributeAssignStatement struct {
+	Token       token.Token
+	StructIdent Identifier
+	Attribute   Identifier
+	Value       Expression
+}
+
+func (aas AttributeAssignStatement) StatementNode()       {}
+func (aas AttributeAssignStatement) TokenLiteral() string { return aas.Token.Literal }
+func (aas AttributeAssignStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("Struct: ")
+	out.WriteString(aas.StructIdent.String())
+	out.WriteString(". Attribute: ")
+	out.WriteString(aas.Attribute.String())
+	out.WriteString(". Value: ")
+	out.WriteString(aas.Value.String())
+	out.WriteString(".")
+
+	return out.String()
+}
+
 type Identifier struct {
 	Token token.Token
 	Value string
