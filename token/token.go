@@ -34,10 +34,7 @@ const (
 	EOF     = "EOF"
 
 	IDENT  = "IDENT"
-	INT    = "INT"
-	BOOL   = "BOOL"
 	NUMBER = "NUMBER"
-	STRUCT = "STRUCT"
 
 	ASSIGN   = "ASSIGN"
 	PLUS     = "PLUS"
@@ -70,4 +67,7 @@ const (
 	END    = "END"
 	TRUE   = "TRUE"
 	FALSE  = "FALSE"
+	STRUCT = "STRUCT"
+	INT    = "INT"
+	BOOL   = "BOOL"
 )

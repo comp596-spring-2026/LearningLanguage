@@ -27,7 +27,7 @@ import (
 	"slices"
 )
 
-var keywords = []string{"int", "bool", "create", "set", "if", "else", "begin", "end", "true", "false"}
+var keywords = []string{"int", "bool", "create", "set", "if", "else", "begin", "end", "true", "false", "struct"}
 
 type Lexer struct {
 	input string
@@ -128,6 +128,16 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.LPAREN, literal)
 		case ')':
 			tok = newToken(token.RPAEREN, literal)
+		case '[':
+			tok = newToken(token.LBRACKET, literal)
+		case ']':
+			tok = newToken(token.RBRACKET, literal)
+		case ',':
+			tok = newToken(token.COMMA, literal)
+		case ':':
+			tok = newToken(token.COLON, literal)
+		case '.':
+			tok = newToken(token.DOT, literal)
 		case 0:
 			tok.Literal = ""
 			tok.Type = token.EOF
@@ -209,6 +219,8 @@ func createKeyword(str string) token.Token {
 		tok = newToken(token.FALSE, str)
 	case "bool":
 		tok = newToken(token.BOOL, str)
+	case "struct":
+		tok = newToken(token.STRUCT, str)
 	}
 	return tok
 }
