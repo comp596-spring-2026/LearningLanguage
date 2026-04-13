@@ -158,6 +158,12 @@ func (p *Parser) parseStatement() ast.Statement {
 			return nil
 		}
 		return stmt
+	case token.STRUCT:
+		stmt := p.parseStructStatement()
+		if stmt == nil {
+			return nil
+		}
+		return stmt
 	default:
 		stmt := p.parseExpressionStatement()
 		if stmt == nil {
@@ -168,18 +174,33 @@ func (p *Parser) parseStatement() ast.Statement {
 
 }
 
-func (p *Parser) checkNextToken(tokTypes []token.TokenType) bool {
-	if slices.Contains(tokTypes, p.peekToken.Type) {
+func (p *Parser) checkNextToken(tokType token.TokenType) bool {
+	if p.peekToken.Type == tokType {
 		p.nextToken()
 		return true
 	} else {
-		p.peekError(tokTypes)
+		p.peekError(tokType)
 		return false
 	}
 }
 
-func (p *Parser) peekError(tokTypes []token.TokenType) {
+func (p *Parser) checkMultipleNextToken(tokTypes []token.TokenType) bool {
+	if slices.Contains(tokTypes, p.peekToken.Type) {
+		p.nextToken()
+		return true
+	} else {
+		p.peekMultiError(tokTypes)
+		return false
+	}
+}
+
+func (p *Parser) peekMultiError(tokTypes []token.TokenType) {
 	msg := fmt.Sprintf("Expected next token to be %v, received %s.", tokTypes, p.peekToken.Type)
+	p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) peekError(tokType token.TokenType) {
+	msg := fmt.Sprintf("Expected next token to be %s, received %s.", tokType, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }
 
@@ -188,25 +209,26 @@ func (p *Parser) parseCreateStatement() *ast.CreateStatement {
 	statement := &ast.CreateStatement{Token: p.curToken}
 
 	//DATATYPE
-	if !p.checkNextToken([]token.TokenType{token.INT, token.BOOL}) { //TODO: add other datatypes
+	if !p.checkMultipleNextToken([]token.TokenType{token.INT, token.BOOL}) { //TODO: add other datatypes
 		return nil
 	}
 
+	var datatype string
 	switch p.curToken.Type {
 	case token.INT:
-		statement.DataType = "int"
+		datatype = "int"
 	case token.BOOL:
-		statement.DataType = "bool"
+		datatype = "bool"
 	}
 
 	//IDENT
-	if !p.checkNextToken([]token.TokenType{token.IDENT}) {
+	if !p.checkNextToken(token.IDENT) {
 		return nil
 	}
-	statement.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	statement.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal, DataType: datatype}
 
 	//SEMICOLON
-	if !p.checkNextToken([]token.TokenType{token.SEMICOLON}) {
+	if !p.checkNextToken(token.SEMICOLON) {
 		return nil
 	}
 
@@ -218,12 +240,12 @@ func (p *Parser) parseSetStatement() *ast.SetStatement {
 	statement := &ast.SetStatement{Token: p.curToken}
 
 	//IDENT
-	if !p.checkNextToken([]token.TokenType{token.IDENT}) {
+	if !p.checkNextToken(token.IDENT) {
 		return nil
 	}
 	statement.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
-	if !p.checkNextToken([]token.TokenType{token.ASSIGN}) {
+	if !p.checkNextToken(token.ASSIGN) {
 		return nil
 	}
 
@@ -231,7 +253,7 @@ func (p *Parser) parseSetStatement() *ast.SetStatement {
 
 	statement.Value = p.parseExpression(LOWEST)
 
-	if !p.checkNextToken([]token.TokenType{token.SEMICOLON}) {
+	if !p.checkNextToken(token.SEMICOLON) {
 		return nil
 	}
 
@@ -253,14 +275,14 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 func (p *Parser) parseIfStatement() *ast.IfStatement {
 	statement := &ast.IfStatement{Token: p.curToken}
 
-	p.checkNextToken([]token.TokenType{token.LPAREN})
+	p.checkNextToken(token.LPAREN)
 
 	p.nextToken()
 	statement.Condition = p.parseExpression(LOWEST)
 
-	p.checkNextToken([]token.TokenType{token.RPAEREN})
-	p.checkNextToken([]token.TokenType{token.BEGIN})
-	p.checkNextToken([]token.TokenType{token.SEMICOLON})
+	p.checkNextToken(token.RPAEREN)
+	p.checkNextToken(token.BEGIN)
+	p.checkNextToken(token.SEMICOLON)
 
 	for p.peekToken.Type != token.END {
 		p.nextToken()
@@ -271,24 +293,67 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 		}
 	}
 
-	p.checkNextToken([]token.TokenType{token.END})
-	p.checkNextToken([]token.TokenType{token.SEMICOLON})
+	p.checkNextToken(token.END)
+	p.checkNextToken(token.SEMICOLON)
 
 	if p.peekToken.Type != token.ELSE {
 		statement.Else = nil
 		return statement
 	} else {
 		p.nextToken()
-		p.checkNextToken([]token.TokenType{token.BEGIN})
-		p.checkNextToken([]token.TokenType{token.SEMICOLON})
+		p.checkNextToken(token.BEGIN)
+		p.checkNextToken(token.SEMICOLON)
 		p.nextToken()
 
 		statement.Else = p.parseStatement()
 
-		p.checkNextToken([]token.TokenType{token.END})
-		p.checkNextToken([]token.TokenType{token.SEMICOLON})
+		p.checkNextToken(token.END)
+		p.checkNextToken(token.SEMICOLON)
 		return statement
 	}
+}
+
+func (p *Parser) parseStructStatement() *ast.StructStatement {
+	statement := &ast.StructStatement{Token: p.curToken, Values: make(map[string]ast.Expression)}
+
+	p.checkNextToken(token.IDENT)
+	statement.StructIdent = ast.Identifier{Token: p.curToken, Value: p.curToken.Literal, DataType: "struct"}
+
+	p.checkNextToken(token.LPAREN)
+	p.checkMultipleNextToken([]token.TokenType{token.BOOL, token.INT})
+	p.checkNextToken(token.IDENT)
+	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	statement.Attributes = append(statement.Attributes, *ident)
+
+	for p.peekToken.Type == token.COMMA {
+		p.checkNextToken(token.COMMA)
+		p.checkMultipleNextToken([]token.TokenType{token.BOOL, token.INT})
+		p.checkNextToken(token.IDENT)
+		ident = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		statement.Attributes = append(statement.Attributes, *ident)
+	}
+	p.checkNextToken(token.RPAEREN)
+
+	p.checkNextToken(token.LBRACKET)
+	p.checkNextToken(token.IDENT)
+	identString := p.curToken.Literal
+	p.checkNextToken(token.COLON)
+	p.nextToken()
+	statement.Values[identString] = p.parseExpression(LOWEST)
+
+	for p.peekToken.Type == token.COMMA {
+		p.checkNextToken(token.COMMA)
+		p.checkNextToken(token.IDENT)
+		identString := p.curToken.Literal
+		p.checkNextToken(token.COLON)
+		p.nextToken()
+		statement.Values[identString] = p.parseExpression(LOWEST)
+	}
+
+	p.checkNextToken(token.RBRACKET)
+	p.checkNextToken(token.SEMICOLON)
+
+	return statement
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {

@@ -79,8 +79,8 @@ func testCreateStatement(test *testing.T, statement ast.Statement, name string, 
 		return false
 	}
 
-	if createStmt.DataType != dataType {
-		test.Errorf("createStmt.DataType not '%s'. got %s", dataType, createStmt.DataType)
+	if createStmt.Name.DataType != dataType {
+		test.Errorf("createStmt.DataType not '%s'. got %s", dataType, createStmt.Name.DataType)
 		return false
 	}
 
@@ -220,6 +220,59 @@ func testIfSetStatement(t *testing.T, stmt *ast.SetStatement, name string, value
 		t.Fatalf("expression.Value is not 1. got=%d", expression.Value)
 		return
 	}
+}
+
+func TestStructStatement(t *testing.T) {
+	input := `struct myStruct(
+				int a,
+				bool b
+			) [a: 123, b: true];`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.StructStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.IfStatement. got=%T",
+			program.Statements[0])
+	}
+
+	name := stmt.StructIdent
+	if name.Value != "myStruct" {
+		t.Fatalf("Struct name is not myStruct, got %s", name.Value)
+	}
+
+	attributes := stmt.Attributes
+
+	if len(attributes) != 2 {
+		t.Fatalf("Too few struct attributes, expected 2, got %d", len(attributes))
+	}
+
+	if attributes[0].Value != "a" && attributes[1].Value != "b" {
+		t.Fatalf("Incorrect struct attribute names, expected 'a' and 'b', got %s, %s", attributes[0].Value, attributes[1].Value)
+	}
+
+	values := stmt.Values
+
+	aInt, ok := values[attributes[0].Value].(*ast.IntegerLiteral)
+	if !ok {
+		t.Fatalf("a's value is not an intlit, got %T", aInt)
+	}
+
+	bBool, ok := values[attributes[1].Value].(*ast.BooleanLiteral)
+	if !ok {
+		t.Fatalf("b's value is not an boolLit, got %T", bBool)
+	}
+
+	testIntegerLiteral(t, aInt, 123)
+	testBooleanLiteral(t, bBool, true)
 }
 
 func TestIdentifierExpression(t *testing.T) {

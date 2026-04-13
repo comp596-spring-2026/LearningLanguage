@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
 	"learningLanguage/token"
 )
 
@@ -45,23 +46,14 @@ func (p *Program) String() string {
 
 // Variable Creation Statement
 type CreateStatement struct {
-	Token    token.Token
-	Name     *Identifier
-	DataType string
+	Token token.Token
+	Name  *Identifier
 }
 
 func (cs *CreateStatement) StatementNode()       {}
 func (cs *CreateStatement) TokenLiteral() string { return cs.Token.Literal }
 func (cs *CreateStatement) String() string {
-	var out bytes.Buffer
-
-	out.WriteString("Identifier Name: ")
-	out.WriteString(cs.Name.String())
-	out.WriteString(". Data Type: ")
-	out.WriteString(cs.DataType)
-	out.WriteString(".")
-
-	return out.String()
+	return cs.Name.String()
 }
 
 // Variable Set Statement
@@ -118,21 +110,24 @@ func (is *IfStatement) String() string {
 }
 
 type StructStatement struct {
-	Token      token.Token
-	Attributes []Identifier
-	Values     map[Identifier]Expression
+	Token       token.Token
+	StructIdent Identifier
+	Attributes  []Identifier
+	Values      map[string]Expression
 }
 
 func (ss *StructStatement) StatementNode()       {}
 func (ss *StructStatement) TokenLiteral() string { return ss.Token.Literal }
 func (ss *StructStatement) String() string {
 	var out bytes.Buffer
+	out.WriteString("Struct: ")
+	out.WriteString(ss.StructIdent.String())
 
 	for _, attribute := range ss.Attributes {
 		out.WriteString("Attribute: ")
 		out.WriteString(attribute.String())
 		out.WriteString(". Value: ")
-		out.WriteString(ss.Values[attribute].String())
+		out.WriteString(ss.Values[attribute.Value].String())
 		out.WriteString(".")
 	}
 
@@ -163,14 +158,15 @@ func (aas AttributeAssignStatement) String() string {
 }
 
 type Identifier struct {
-	Token token.Token
-	Value string
+	Token    token.Token
+	Value    string
+	DataType string
 }
 
 func (i *Identifier) ExpressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string {
-	return i.Value
+	return fmt.Sprintf("Name: %s, DataType: %s", i.Value, i.DataType)
 }
 
 type IntegerLiteral struct {

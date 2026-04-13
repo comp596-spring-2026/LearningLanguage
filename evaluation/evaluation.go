@@ -69,7 +69,7 @@ func evaluateStatement(statement ast.Statement) string {
 }
 
 func evaluateCreateStatement(statement *ast.CreateStatement) string {
-	variableMap[statement.Name.Value] = Data{dataType: variableTypes[statement.DataType]}
+	variableMap[statement.Name.Value] = Data{dataType: variableTypes[statement.Name.DataType]}
 	return ""
 }
 
