@@ -50,11 +50,11 @@ func executeProgram(in io.Reader, out io.Writer) {
 
 	if len(errors) == 0 {
 		fmt.Fprint(out, output)
-		fmt.Println(output)
+		// fmt.Println(output)
 	} else {
 		for _, err := range errors {
 			fmt.Fprint(out, err)
-			fmt.Println(err)
+			// fmt.Println(err)
 		}
 	}
 }
