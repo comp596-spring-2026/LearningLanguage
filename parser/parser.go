@@ -53,6 +53,8 @@ var precedences = map[token.TokenType]int{
 	token.LE:       LESSGREATER,
 }
 
+var DATATYPES = []token.TokenType{token.BOOL, token.INT}
+
 type (
 	prefixParseFn func() ast.Expression
 	infixParseFn  func(ast.Expression) ast.Expression
@@ -352,7 +354,7 @@ func (p *Parser) parseStructStatement() *ast.StructStatement {
 	if !p.checkNextToken(token.LPAREN) {
 		return nil
 	}
-	if !p.checkMultipleNextToken([]token.TokenType{token.BOOL, token.INT}) {
+	if !p.checkMultipleNextToken(DATATYPES) {
 		return nil
 	}
 	if !p.checkNextToken(token.IDENT) {
@@ -363,7 +365,7 @@ func (p *Parser) parseStructStatement() *ast.StructStatement {
 
 	for p.peekToken.Type == token.COMMA {
 		p.checkNextToken(token.COMMA)
-		if !p.checkMultipleNextToken([]token.TokenType{token.BOOL, token.INT}) {
+		if !p.checkMultipleNextToken(DATATYPES) {
 			return nil
 		}
 		if !p.checkNextToken(token.IDENT) {

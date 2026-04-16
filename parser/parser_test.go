@@ -420,8 +420,8 @@ func TestParsingPrefixExpressions(t *testing.T) {
 		operator string
 		boolean  bool
 	}{
-		{"!true", "!", true},
-		{"!false", "!", false},
+		{"!true;", "!", true},
+		{"!false;", "!", false},
 	}
 
 	for _, tt := range prefixNegTests {
@@ -538,7 +538,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"2-2;", 2, "-", 2},
 		{"2*2;", 2, "*", 2},
 		{"2/2;", 2, "/", 2},
-		{"2>1", 2, ">", 1},
+		{"2>1;", 2, ">", 1},
 		{"2>=1;", 2, ">=", 1},
 		{"2<1;", 2, "<", 1},
 		{"2<=1;", 2, "<=", 1},
