@@ -275,6 +275,41 @@ func TestStructStatement(t *testing.T) {
 	testBooleanLiteral(t, bBool, true)
 }
 
+func TestAltStructStatement(t *testing.T) {
+	input := `struct myStruct(int a, bool b);`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.StructStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.IfStatement. got=%T",
+			program.Statements[0])
+	}
+
+	name := stmt.StructIdent
+	if name.Value != "myStruct" {
+		t.Fatalf("Struct name is not myStruct, got %s", name.Value)
+	}
+
+	attributes := stmt.Attributes
+
+	if len(attributes) != 2 {
+		t.Fatalf("Too few struct attributes, expected 2, got %d", len(attributes))
+	}
+
+	if attributes[0].Value != "a" && attributes[1].Value != "b" {
+		t.Fatalf("Incorrect struct attribute names, expected 'a' and 'b', got %s, %s", attributes[0].Value, attributes[1].Value)
+	}
+}
+
 func TestAttributeSetStatement(t *testing.T) {
 	input := "set myStruct.a = 123;"
 
@@ -345,18 +380,24 @@ func TestAttributeIdentifier(t *testing.T) {
 }
 
 func TestIdentifierExpression(t *testing.T) {
-	input := "foobar;"
+	input := "foobar;foobar.a;"
 
 	l := lexer.New(input)
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
-	if len(program.Statements) != 1 {
+	if len(program.Statements) != 2 {
 		t.Fatalf("program has not enough statements. got=%d",
 			len(program.Statements))
 	}
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	attrStmt, ok := program.Statements[1].(*ast.ExpressionStatement)
 	if !ok {
 		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
 			program.Statements[0])
@@ -372,6 +413,22 @@ func TestIdentifierExpression(t *testing.T) {
 	if ident.TokenLiteral() != "foobar" {
 		t.Errorf("ident.TokenLiteral not %s. got=%s", "foobar",
 			ident.TokenLiteral())
+	}
+
+	attrIdent, ok := attrStmt.Expression.(*ast.Identifier)
+	if !ok {
+		t.Fatalf("attrIdent not *ast.Identifier. got=%T", attrStmt.Expression)
+	}
+
+	if attrIdent.Value != "foobar" {
+		t.Errorf("attrIdent.Value not %s. got=%s", "foobar", attrIdent.Value)
+	}
+	if attrIdent.Attribute != "a" {
+		t.Errorf("attrIdent.Attribute not %s. got=%s", "a", attrIdent.Attribute)
+	}
+	if attrIdent.TokenLiteral() != "foobar" {
+		t.Errorf("attrIdent.TokenLiteral not %s. got=%s", "foobar",
+			attrIdent.TokenLiteral())
 	}
 }
 

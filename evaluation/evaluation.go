@@ -54,14 +54,19 @@ func evaluateStatement(statement ast.Statement) string {
 		output = evaluateIfStatement(ifStmt)
 	}
 
+	structStmt, ok := statement.(*ast.StructStatement)
+	if ok {
+		output = evaluateStructStatement(structStmt)
+	}
+
 	exprStmt, ok := statement.(*ast.ExpressionStatement)
 	if ok {
 		value := evaluateExpression(exprStmt.Expression)
 		switch value.dataType {
 		case INTTYPE:
-			output = strconv.FormatInt(value.intValue, 10)
+			output = strconv.FormatInt(value.intValue, 10) + "\n"
 		case BOOLTYPE:
-			output = strconv.FormatBool(value.boolValue)
+			output = strconv.FormatBool(value.boolValue) + "\n"
 		}
 	}
 
@@ -74,12 +79,26 @@ func evaluateCreateStatement(statement *ast.CreateStatement) string {
 }
 
 func evaluateSetStatement(statement *ast.SetStatement) string {
-	_, ok := variableMap[statement.Name.Value]
+	var name string
+	if statement.Name.Attribute != "" {
+		name = fmt.Sprintf("%s.%s", statement.Name.Value, statement.Name.Attribute)
+	} else {
+		name = statement.Name.Value
+	}
+	_, ok := variableMap[name]
 	if !ok {
 		errors = append(errors, fmt.Sprintf("Variable %s has not been created.", statement.Name.Value))
 		return ""
 	}
-	variableMap[statement.Name.Value] = evaluateExpression(statement.Value)
+	variableMap[name] = evaluateExpression(statement.Value)
+	return ""
+}
+
+func evaluateStructStatement(statement *ast.StructStatement) string {
+	for _, attribute := range statement.Attributes {
+		attributeName := fmt.Sprintf("%s.%s", statement.StructIdent.Value, attribute.Value)
+		variableMap[attributeName] = evaluateExpression(statement.Values[attribute.Value])
+	}
 	return ""
 }
 
@@ -138,7 +157,13 @@ func evaluateBoolLit(expression *ast.BooleanLiteral) Data {
 }
 
 func evaluateIdentifier(identifier *ast.Identifier) Data {
-	value, ok := variableMap[identifier.Value]
+	var name string
+	if identifier.Attribute != "" {
+		name = fmt.Sprintf("%s.%s", identifier.Value, identifier.Attribute)
+	} else {
+		name = identifier.Value
+	}
+	value, ok := variableMap[name]
 	if !ok {
 		errors = append(errors, fmt.Sprintf("Variable %s does not exist.", identifier.Value))
 		return Data{}
@@ -203,28 +228,28 @@ func evaluateInfixExp(expression *ast.InfixExpression) Data {
 			errors = append(errors, "Cannot perform perform quanitative comparisons with non-integers.")
 			return Data{}
 		}
-		retValue.boolValue = leftValue.intValue > retValue.intValue
+		retValue.boolValue = leftValue.intValue > rightValue.intValue
 	case ">=":
 		retValue.dataType = BOOLTYPE
 		if leftValue.dataType != INTTYPE && rightValue.dataType != INTTYPE {
 			errors = append(errors, "Cannot perform perform quanitative comparisons with non-integers.")
 			return Data{}
 		}
-		retValue.boolValue = leftValue.intValue >= retValue.intValue
+		retValue.boolValue = leftValue.intValue >= rightValue.intValue
 	case "<":
 		retValue.dataType = BOOLTYPE
 		if leftValue.dataType != INTTYPE && rightValue.dataType != INTTYPE {
 			errors = append(errors, "Cannot perform perform quanitative comparisons with non-integers.")
 			return Data{}
 		}
-		retValue.boolValue = leftValue.intValue < retValue.intValue
+		retValue.boolValue = leftValue.intValue < rightValue.intValue
 	case "<=":
 		retValue.dataType = BOOLTYPE
 		if leftValue.dataType != INTTYPE && rightValue.dataType != INTTYPE {
 			errors = append(errors, "Cannot perform perform quanitative comparisons with non-integers.")
 			return Data{}
 		}
-		retValue.boolValue = leftValue.intValue <= retValue.intValue
+		retValue.boolValue = leftValue.intValue <= rightValue.intValue
 	}
 	return retValue
 }

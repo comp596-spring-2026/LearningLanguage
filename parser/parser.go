@@ -378,6 +378,11 @@ func (p *Parser) parseStructStatement() *ast.StructStatement {
 		return nil
 	}
 
+	if p.peekToken.Type == token.SEMICOLON {
+		p.checkNextToken(token.SEMICOLON)
+		return statement
+	}
+
 	if !p.checkNextToken(token.LBRACKET) {
 		return nil
 	}
