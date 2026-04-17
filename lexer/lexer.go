@@ -2,24 +2,18 @@ package lexer
 
 /*
 Language feature currently being worked on:
-struct myStruct(
-	int a,
-	bool b
-) [a: 123, b: true];
-
-OR
-
-struct myStruct(int a, bool b);
-myStruct.a = 123;
-myStruct.b = true;
+create string x;
+create floay y;
+set x = "Hello World";
+set y = 3.14;
+x;
+y;
 
 Tokens:
-STRUCT
-COMMA
-COLON
-DOT
-LBRACKET
-RBRACKET
+STRING
+FLOAT
+QUOTE
+NUMBER(modify)
 */
 
 import (
@@ -27,7 +21,7 @@ import (
 	"slices"
 )
 
-var keywords = []string{"int", "bool", "create", "set", "if", "else", "begin", "end", "true", "false", "struct"}
+var keywords = []string{"int", "bool", "create", "set", "if", "else", "begin", "end", "true", "false", "struct", "float", "string"}
 
 type Lexer struct {
 	input string
@@ -138,6 +132,8 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.COLON, literal)
 		case '.':
 			tok = newToken(token.DOT, literal)
+		case '"':
+			tok = newToken(token.QUOTE, literal)
 		case 0:
 			tok.Literal = ""
 			tok.Type = token.EOF
@@ -166,7 +162,7 @@ func isLetter(char byte) bool {
 func readNumber(l *Lexer) token.Token {
 	str := string(l.ch)
 	l.readChar()
-	for isNumber(l.ch) {
+	for isNumber(l.ch) || l.ch == '.' {
 		str += string(l.ch)
 		l.readChar()
 	}
@@ -221,6 +217,10 @@ func createKeyword(str string) token.Token {
 		tok = newToken(token.BOOL, str)
 	case "struct":
 		tok = newToken(token.STRUCT, str)
+	case "float":
+		tok = newToken(token.FLOAT, str)
+	case "string":
+		tok = newToken(token.STRING, str)
 	}
 	return tok
 }

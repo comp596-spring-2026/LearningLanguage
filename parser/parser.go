@@ -2,24 +2,18 @@ package parser
 
 /*
 Language feature currently being worked on:
-struct myStruct(
-	int a,
-	bool b
-) [a: 123, b: true];
-
-OR
-
-struct myStruct(int a, bool b);
-myStruct.a = 123;
-myStruct.b = true;
+create string x;
+create floay y;
+set x = "Hello World";
+set y = 3.14;
+x;
+y;
 
 Tokens:
-STRUCT
-COMMA
-COLON
-DOT
-LBRACKET
-RBRACKET
+STRING
+FLOAT
+QUOTE
+NUMBER(modify)
 */
 
 import (

@@ -49,8 +49,8 @@ import (
 
 func TestLexerVariables(t *testing.T) {
 	input := `create int a;
-			create int b;
-			set b = 3;
+			create bool b;
+			set b = true;
 			set a = 5;`
 	tests := []struct {
 		expectedType    token.TokenType
@@ -61,13 +61,13 @@ func TestLexerVariables(t *testing.T) {
 		{token.IDENT, "a"},
 		{token.SEMICOLON, ";"},
 		{token.CREATE, "create"},
-		{token.INT, "int"},
+		{token.BOOL, "bool"},
 		{token.IDENT, "b"},
 		{token.SEMICOLON, ";"},
 		{token.SET, "set"},
 		{token.IDENT, "b"},
 		{token.ASSIGN, "="},
-		{token.NUMBER, "3"},
+		{token.TRUE, "true"},
 		{token.SEMICOLON, ";"},
 		{token.SET, "set"},
 		{token.IDENT, "a"},
@@ -238,6 +238,34 @@ func TestStruct(t *testing.T) {
 		{token.DOT, "."},
 		{token.LBRACKET, "["},
 		{token.RBRACKET, "]"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
+				i, tt.expectedType, tok.Type)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
+func TestFloatString(t *testing.T) {
+	input := `float string " 3.14`
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.FLOAT, "float"},
+		{token.STRING, "string"},
+		{token.QUOTE, "\""},
+		{token.NUMBER, "3.14"},
 	}
 
 	l := New(input)
