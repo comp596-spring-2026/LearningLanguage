@@ -2,18 +2,10 @@ package token
 
 /*
 Language feature currently being worked on:
-create string x;
-create floay y;
-set x = "Hello World";
-set y = 3.14;
-x;
-y;
+print(<expression>)
 
 Tokens:
-STRING
-FLOAT
-QUOTE
-NUMBER(modify)
+PRINT
 */
 
 type TokenType string
@@ -67,4 +59,5 @@ const (
 	BOOL   = "BOOL"
 	FLOAT  = "FLOAT"
 	STRING = "STRING"
+	PRINT  = "PRINT"
 )

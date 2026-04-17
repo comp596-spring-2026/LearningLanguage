@@ -2,18 +2,10 @@ package lexer
 
 /*
 Language feature currently being worked on:
-create string x;
-create floay y;
-set x = "Hello World";
-set y = 3.14;
-x;
-y;
+print(<expression>)
 
 Tokens:
-STRING
-FLOAT
-QUOTE
-NUMBER(modify)
+PRINT
 */
 
 import (
@@ -21,7 +13,7 @@ import (
 	"slices"
 )
 
-var keywords = []string{"int", "bool", "create", "set", "if", "else", "begin", "end", "true", "false", "struct", "float", "string"}
+var keywords = []string{"int", "bool", "create", "set", "if", "else", "begin", "end", "true", "false", "struct", "float", "string", "print"}
 
 type Lexer struct {
 	input string
@@ -233,6 +225,8 @@ func createKeyword(str string) token.Token {
 		tok = newToken(token.FLOAT, str)
 	case "string":
 		tok = newToken(token.STRING, str)
+	case "print":
+		tok = newToken(token.PRINT, str)
 	}
 	return tok
 }

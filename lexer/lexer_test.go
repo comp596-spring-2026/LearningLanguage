@@ -1,45 +1,11 @@
 package lexer
 
 /*
-Language subset currently being worked on:
-create int a;
-create int b;
-set b = 3;
-set a = 5;
-set a = a * 1;
-set b = b / 5;
-set a = a - 1
-set b = b + 1
-
-if (a > b) begin;
-c = a - b; end;
-else begin;
-c = b - a; end;
+Language feature currently being worked on:
+print(<expression>)
 
 Tokens:
-CREATE
-SET
-INT
-IDENTIFIER
-EQUAL
-NUMBER
-SEMICOLON
-IF
-GREATER
-LESS
-GE
-LE
-EQ
-NEQ
-NOT
-BEGIN
-END
-PLUS
-MINUS
-DIVIDE
-MULTIPLY
-LPAREN
-RPAREN
+PRINT
 */
 
 import (
@@ -266,6 +232,34 @@ func TestFloatString(t *testing.T) {
 		{token.STRING, "string"},
 		{token.QUOTE, "\"Hello World\""},
 		{token.NUMBER, "3.14"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
+				i, tt.expectedType, tok.Type)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
+func TestPrint(t *testing.T) {
+	input := `print("Hello World")`
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.PRINT, "print"},
+		{token.LPAREN, "("},
+		{token.QUOTE, "\"Hello World\""},
+		{token.RPAEREN, ")"},
 	}
 
 	l := New(input)
