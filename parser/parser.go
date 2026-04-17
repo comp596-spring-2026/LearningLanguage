@@ -23,6 +23,7 @@ import (
 	"learningLanguage/token"
 	"slices"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -47,7 +48,7 @@ var precedences = map[token.TokenType]int{
 	token.LE:       LESSGREATER,
 }
 
-var DATATYPES = []token.TokenType{token.BOOL, token.INT}
+var DATATYPES = []token.TokenType{token.BOOL, token.INT, token.STRING, token.FLOAT}
 
 type (
 	prefixParseFn func() ast.Expression
@@ -87,7 +88,8 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
-	p.registerPrefix(token.NUMBER, p.parseIntegerLiteral)
+	p.registerPrefix(token.NUMBER, p.parseNumber)
+	p.registerPrefix(token.QUOTE, p.parseStringLiteral)
 	p.registerPrefix(token.FALSE, p.parseBooleanLiteral)
 	p.registerPrefix(token.TRUE, p.parseBooleanLiteral)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
@@ -160,6 +162,7 @@ func (p *Parser) parseStatement() ast.Statement {
 			return nil
 		}
 		return stmt
+
 	default:
 		stmt := p.parseExpressionStatement()
 		if stmt == nil {
@@ -205,7 +208,7 @@ func (p *Parser) parseCreateStatement() *ast.CreateStatement {
 	statement := &ast.CreateStatement{Token: p.curToken}
 
 	//DATATYPE
-	if !p.checkMultipleNextToken([]token.TokenType{token.INT, token.BOOL}) { //TODO: add other datatypes
+	if !p.checkMultipleNextToken(DATATYPES) { //TODO: add other datatypes
 		return nil
 	}
 
@@ -215,6 +218,10 @@ func (p *Parser) parseCreateStatement() *ast.CreateStatement {
 		datatype = "int"
 	case token.BOOL:
 		datatype = "bool"
+	case token.STRING:
+		datatype = "string"
+	case token.FLOAT:
+		datatype = "float"
 	}
 
 	//IDENT
@@ -453,12 +460,35 @@ func (p *Parser) parseIdentifier() ast.Expression {
 	return ident
 }
 
+func (p *Parser) parseNumber() ast.Expression {
+	if strings.Contains(p.curToken.Literal, ".") {
+		return p.parseFloatLiteral()
+	} else {
+		return p.parseIntegerLiteral()
+	}
+}
+
 func (p *Parser) parseIntegerLiteral() ast.Expression {
 	lit := &ast.IntegerLiteral{Token: p.curToken}
 
 	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	lit.Value = value
+
+	return lit
+}
+
+func (p *Parser) parseFloatLiteral() ast.Expression {
+	lit := &ast.FloatLiteral{Token: p.curToken}
+
+	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as float", p.curToken.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
@@ -482,6 +512,11 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 		return nil
 	}
 
+	return lit
+}
+
+func (p *Parser) parseStringLiteral() ast.Expression {
+	lit := &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
 	return lit
 }
 

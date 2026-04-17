@@ -115,7 +115,7 @@ func TestSetStatements(test *testing.T) {
 	}{
 		{"w", "3"},
 		{"x", "true"},
-		{"y", "Hello World"},
+		{"y", "\"Hello World\""},
 		{"z", "3.14"},
 	}
 
@@ -464,6 +464,99 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 	if literal.TokenLiteral() != "2" {
 		t.Errorf("literal.TokenLiteral not %s. got=%s", "2",
+			literal.TokenLiteral())
+	}
+}
+
+func TestBooleanLiteralExpression(t *testing.T) {
+	input := "true;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	literal, ok := stmt.Expression.(*ast.BooleanLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.BooleanLiteral. got=%T", stmt.Expression)
+	}
+	if literal.Value != true {
+		t.Errorf("literal.Value not %t. got=%t", true, literal.Value)
+	}
+	if literal.TokenLiteral() != "true" {
+		t.Errorf("literal.TokenLiteral not %s. got=%s", "true",
+			literal.TokenLiteral())
+	}
+}
+
+func TestStringLiteralExpression(t *testing.T) {
+	input := "\"Hello World\";"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	literal, ok := stmt.Expression.(*ast.StringLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.StringLiteral. got=%T", stmt.Expression)
+	}
+	if literal.Value != "\"Hello World\"" {
+		t.Errorf("literal.Value not %s. got=%s", "\"Hello World\"", literal.Value)
+	}
+	if literal.TokenLiteral() != "\"Hello World\"" {
+		t.Errorf("literal.TokenLiteral not %s. got=%s", "\"Hello World\"",
+			literal.TokenLiteral())
+	}
+}
+
+func TestFloatLiteralExpression(t *testing.T) {
+	input := "3.14;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	literal, ok := stmt.Expression.(*ast.FloatLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.FloatLiteral. got=%T", stmt.Expression)
+	}
+	if literal.Value != 3.14 {
+		t.Errorf("literal.Value not %f. got=%f", 3.14, literal.Value)
+	}
+	if literal.TokenLiteral() != "3.14" {
+		t.Errorf("literal.TokenLiteral not %s. got=%s", "3.14",
 			literal.TokenLiteral())
 	}
 }
