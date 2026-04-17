@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"learningLanguage/ast"
 	"strconv"
+	"strings"
 )
 
 const (
 	INTTYPE = iota
 	BOOLTYPE
 	STRINGTYPE
+	FLOATTYPE
 )
 
 type Data struct {
@@ -18,6 +20,7 @@ type Data struct {
 	intValue    int64
 	boolValue   bool
 	stringValue string
+	floatValue  float64
 }
 
 var variableTypes = map[string]int{
@@ -67,6 +70,10 @@ func evaluateStatement(statement ast.Statement) string {
 			output = strconv.FormatInt(value.intValue, 10) + "\n"
 		case BOOLTYPE:
 			output = strconv.FormatBool(value.boolValue) + "\n"
+		case FLOATTYPE:
+			output = strconv.FormatFloat(value.floatValue, 'f', -1, 64) + "\n"
+		case STRINGTYPE:
+			output = strings.Trim(value.stringValue, "\"") + "\n"
 		}
 	}
 
@@ -129,6 +136,16 @@ func evaluateExpression(expression ast.Expression) Data {
 		value = evaluateBoolLit(boolLit)
 	}
 
+	floatLiteral, ok := expression.(*ast.FloatLiteral)
+	if ok {
+		value = evaluateFloatLit(floatLiteral)
+	}
+
+	strLit, ok := expression.(*ast.StringLiteral)
+	if ok {
+		value = evaluateStringLit(strLit)
+	}
+
 	identifierExp, ok := expression.(*ast.Identifier)
 	if ok {
 		value = evaluateIdentifier(identifierExp)
@@ -153,7 +170,14 @@ func evaluateIntLit(expression *ast.IntegerLiteral) Data {
 
 func evaluateBoolLit(expression *ast.BooleanLiteral) Data {
 	return Data{dataType: BOOLTYPE, boolValue: expression.Value}
+}
 
+func evaluateFloatLit(expression *ast.FloatLiteral) Data {
+	return Data{dataType: FLOATTYPE, floatValue: expression.Value}
+}
+
+func evaluateStringLit(expression *ast.StringLiteral) Data {
+	return Data{dataType: STRINGTYPE, stringValue: expression.Value}
 }
 
 func evaluateIdentifier(identifier *ast.Identifier) Data {

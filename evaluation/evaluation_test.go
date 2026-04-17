@@ -100,3 +100,32 @@ func TestInfixEval(test *testing.T) {
 		test.Fatalf("Incorrect variable value, expected \n2\n0\n2\n64\ntrue\ntrue\ntrue\nfalse\ntrue\ntrue\ngot \n%s", output)
 	}
 }
+
+func TestDataTypes(test *testing.T) {
+	input := `create int w;
+				set w = 123;
+				w;
+				create bool x;
+				set x = true;
+				x;
+				create float y;
+				set y = 3.14;
+				y;
+				create string z;
+				set z = "Hello World";
+				z;`
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+
+	output, errors := EvaluateProgram(program)
+	if len(errors) != 0 {
+		test.Fatalf("Errors were found: %v", errors)
+	}
+
+	output = strings.TrimSpace(output)
+
+	if output != "123\ntrue\n3.14\nHello World" {
+		test.Fatalf("Incorrect variable value, expected \n123\ntrue\n3.14\nHello World\ngot \n%s", output)
+	}
+}
