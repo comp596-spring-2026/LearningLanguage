@@ -133,6 +133,18 @@ func (l *Lexer) NextToken() token.Token {
 		case '.':
 			tok = newToken(token.DOT, literal)
 		case '"':
+			l.readChar()
+			for l.ch != '"' {
+				if l.ch == 0 {
+					tok.Literal = "ERROR"
+					tok.Type = token.ILLEGAL
+					l.readChar()
+					return tok
+				}
+				literal += string(l.ch)
+				l.readChar()
+			}
+			literal += string(l.ch)
 			tok = newToken(token.QUOTE, literal)
 		case 0:
 			tok.Literal = ""

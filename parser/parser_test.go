@@ -22,9 +22,10 @@ func checkParserErrors(test *testing.T, p *Parser) {
 
 func TestCreateStatements(test *testing.T) {
 	input := `
-	create int x; 
-	create bool y; 
-	create int z;`
+	create int w; 
+	create bool x; 
+	create string y;
+	create float z;`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -34,7 +35,7 @@ func TestCreateStatements(test *testing.T) {
 	if program == nil {
 		test.Fatalf("ParseProgram() returned nil")
 	}
-	if len(program.Statements) != 3 {
+	if len(program.Statements) != 4 {
 		test.Fatalf("program.Statements does not contain 3 statements. got=%d",
 			len(program.Statements))
 	}
@@ -43,9 +44,10 @@ func TestCreateStatements(test *testing.T) {
 		expectedIdentifier string
 		expectedDataType   string
 	}{
-		{"x", "int"},
-		{"y", "bool"},
-		{"z", "int"},
+		{"w", "int"},
+		{"x", "bool"},
+		{"y", "string"},
+		{"z", "float"},
 	}
 
 	for i, tt := range tests {
@@ -89,9 +91,10 @@ func testCreateStatement(test *testing.T, statement ast.Statement, name string, 
 
 func TestSetStatements(test *testing.T) {
 	input := `
-	set x = 3; 
-	set y = 2; 
-	set z = 223;`
+	set w = 3; 
+	set x = true; 
+	set y = "Hello World";
+	set z = 3.14;`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -101,29 +104,30 @@ func TestSetStatements(test *testing.T) {
 	if program == nil {
 		test.Fatalf("ParseProgram() returned nil")
 	}
-	if len(program.Statements) != 3 {
+	if len(program.Statements) != 4 {
 		test.Fatalf("program.Statements does not contain 3 statements. got=%d",
 			len(program.Statements))
 	}
 
 	tests := []struct {
-		expectedIdentifier string
-		expectedIntLit     int64
+		expectedIdentifier        string
+		expectedExpressionLiteral string
 	}{
-		{"x", 3},
-		{"y", 2},
-		{"z", 223},
+		{"w", "3"},
+		{"x", "true"},
+		{"y", "Hello World"},
+		{"z", "3.14"},
 	}
 
 	for i, tt := range tests {
 		stmt := program.Statements[i]
-		if !testSetStatement(test, stmt, tt.expectedIdentifier, tt.expectedIntLit) {
+		if !testSetStatement(test, stmt, tt.expectedIdentifier, tt.expectedExpressionLiteral) {
 			return
 		}
 	}
 }
 
-func testSetStatement(test *testing.T, statement ast.Statement, name string, value int64) bool {
+func testSetStatement(test *testing.T, statement ast.Statement, name string, explit string) bool {
 	if statement.TokenLiteral() != "set" {
 		test.Errorf("s.TokenLiteral not 'set'. got=%q", statement.TokenLiteral())
 		return false
@@ -146,7 +150,8 @@ func testSetStatement(test *testing.T, statement ast.Statement, name string, val
 		return false
 	}
 
-	if !testIntegerLiteral(test, setStmt.Value, value) {
+	if setStmt.Value.TokenLiteral() != explit {
+		test.Errorf("setStmt.Value.TokenLiteral() not '%s'. got=%s", explit, setStmt.Value.TokenLiteral())
 		return false
 	}
 

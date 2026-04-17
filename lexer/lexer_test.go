@@ -257,14 +257,14 @@ func TestStruct(t *testing.T) {
 }
 
 func TestFloatString(t *testing.T) {
-	input := `float string " 3.14`
+	input := `float string "Hello World" 3.14`
 	tests := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
 		{token.FLOAT, "float"},
 		{token.STRING, "string"},
-		{token.QUOTE, "\""},
+		{token.QUOTE, "\"Hello World\""},
 		{token.NUMBER, "3.14"},
 	}
 
