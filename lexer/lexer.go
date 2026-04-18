@@ -2,10 +2,12 @@ package lexer
 
 /*
 Language feature currently being worked on:
-print(<expression>)
+1 > 2 or true;
+2 == 2 and false;
 
 Tokens:
-PRINT
+AND
+OR
 */
 
 import (
@@ -13,7 +15,12 @@ import (
 	"slices"
 )
 
-var keywords = []string{"int", "bool", "create", "set", "if", "else", "begin", "end", "true", "false", "struct", "float", "string", "print"}
+var keywords = []string{
+	"int", "bool", "create",
+	"set", "if", "else",
+	"begin", "end", "true",
+	"false", "struct", "float",
+	"string", "print", "or", "and"}
 
 type Lexer struct {
 	input string
@@ -227,6 +234,10 @@ func createKeyword(str string) token.Token {
 		tok = newToken(token.STRING, str)
 	case "print":
 		tok = newToken(token.PRINT, str)
+	case "or":
+		tok = newToken(token.OR, str)
+	case "and":
+		tok = newToken(token.AND, str)
 	}
 	return tok
 }

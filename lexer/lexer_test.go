@@ -160,7 +160,7 @@ func TestLexerFlowControl(t *testing.T) {
 }
 
 func TestBooleans(t *testing.T) {
-	input := `!true false != > >= < <= ==`
+	input := `!true false != > >= < <= == or and`
 	tests := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
@@ -174,6 +174,8 @@ func TestBooleans(t *testing.T) {
 		{token.LT, "<"},
 		{token.LE, "<="},
 		{token.EQ, "=="},
+		{token.OR, "or"},
+		{token.AND, "and"},
 	}
 
 	l := New(input)
