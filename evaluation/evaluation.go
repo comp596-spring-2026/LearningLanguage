@@ -274,6 +274,20 @@ func evaluateInfixExp(expression *ast.InfixExpression) Data {
 			return Data{}
 		}
 		retValue.boolValue = leftValue.intValue <= rightValue.intValue
+	case "or":
+		retValue.dataType = BOOLTYPE
+		if leftValue.dataType != BOOLTYPE && rightValue.dataType != BOOLTYPE {
+			errors = append(errors, "Cannot perform perform logical operations with non-booleans.")
+			return Data{}
+		}
+		retValue.boolValue = leftValue.boolValue || rightValue.boolValue
+	case "and":
+		retValue.dataType = BOOLTYPE
+		if leftValue.dataType != BOOLTYPE && rightValue.dataType != BOOLTYPE {
+			errors = append(errors, "Cannot perform perform logical operations with non-booleans.")
+			return Data{}
+		}
+		retValue.boolValue = leftValue.boolValue && rightValue.boolValue
 	}
 	return retValue
 }

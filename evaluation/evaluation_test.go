@@ -95,7 +95,9 @@ func TestInfixEval(test *testing.T) {
 			print(1==1);
 			print(1!=1);
 			print(1<2);
-			print(1<=1);`
+			print(1<=1);
+			print(true and false);
+			print(false or true);`
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
@@ -107,8 +109,8 @@ func TestInfixEval(test *testing.T) {
 
 	output = strings.TrimSpace(output)
 
-	if output != "2\n0\n2\n64\ntrue\ntrue\ntrue\nfalse\ntrue\ntrue" {
-		test.Fatalf("Incorrect variable value, expected \n2\n0\n2\n64\ntrue\ntrue\ntrue\nfalse\ntrue\ntrue\ngot \n%s", output)
+	if output != "2\n0\n2\n64\ntrue\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue" {
+		test.Fatalf("Incorrect variable value, expected \n2\n0\n2\n64\ntrue\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\ngot \n%s", output)
 	}
 }
 
