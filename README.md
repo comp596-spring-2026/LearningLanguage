@@ -2,7 +2,7 @@
 A programming language designed to serve as a tool to bridge the gap between a students understanding of block-based languages like Scratch and complex modern lanugages like Java or C++.
 
 ### Requirements
-[Go Installation Instructions](https://go.dev/doc/install)
+[Go Installation Instructions](https://go.dev/doc/install)<br>
 Clone the repo to its own directory
 
 ### Running the REPL
