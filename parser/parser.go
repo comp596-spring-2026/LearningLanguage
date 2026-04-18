@@ -24,6 +24,7 @@ const (
 	LOWEST      = iota + 1 // everything else
 	EQUALS                 // ==
 	LESSGREATER            // >, >=, <, <=
+	ORAND                  // or/and boolean logic
 	SUMDIFF                // + or -
 	PRODUCTDIV             // * or /
 	PREFIX                 // -X
@@ -40,6 +41,8 @@ var precedences = map[token.TokenType]int{
 	token.GE:       LESSGREATER,
 	token.LT:       LESSGREATER,
 	token.LE:       LESSGREATER,
+	token.OR:       ORAND,
+	token.AND:      ORAND,
 }
 
 var DATATYPES = []token.TokenType{token.BOOL, token.INT, token.STRING, token.FLOAT}
@@ -100,6 +103,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LE, p.parseInfixExpression)
 	p.registerInfix(token.EQ, p.parseInfixExpression)
 	p.registerInfix(token.NEQ, p.parseInfixExpression)
+	p.registerInfix(token.AND, p.parseInfixExpression)
+	p.registerInfix(token.OR, p.parseInfixExpression)
 
 	return p
 }

@@ -716,7 +716,7 @@ func testBooleanLiteral(t *testing.T, il ast.Expression, value bool) bool {
 }
 
 func TestParsingInfixExpressions(t *testing.T) {
-	infixTests := []struct {
+	infixNumTests := []struct {
 		input      string
 		leftValue  int64
 		operator   string
@@ -734,7 +734,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"2!=1;", 2, "!=", 1},
 	}
 
-	for _, test := range infixTests {
+	for _, test := range infixNumTests {
 		lex := lexer.New(test.input)
 		parser := New(lex)
 		program := parser.ParseProgram()
@@ -765,6 +765,51 @@ func TestParsingInfixExpressions(t *testing.T) {
 		}
 
 		if !testIntegerLiteral(t, expression.Right, test.rightValue) {
+			return
+		}
+	}
+
+	infixBoolTests := []struct {
+		input      string
+		leftValue  bool
+		operator   string
+		rightValue bool
+	}{
+		{"true and false;", true, "and", false},
+		{"false or true;", false, "or", true},
+	}
+
+	for _, test := range infixBoolTests {
+		lex := lexer.New(test.input)
+		parser := New(lex)
+		program := parser.ParseProgram()
+		checkParserErrors(t, parser)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+				2, len(program.Statements))
+		}
+
+		statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+				program.Statements[0])
+		}
+
+		expression, ok := statement.Expression.(*ast.InfixExpression)
+		if !ok {
+			t.Fatalf("stmt is not ast.PrefixExpression. got=%T", statement.Expression)
+		}
+
+		if !testBooleanLiteral(t, expression.Left, test.leftValue) {
+			return
+		}
+
+		if expression.Operator != test.operator {
+			t.Fatalf("Operator is not %s. Got %s", test.operator, expression.Operator)
+		}
+
+		if !testBooleanLiteral(t, expression.Right, test.rightValue) {
 			return
 		}
 	}
