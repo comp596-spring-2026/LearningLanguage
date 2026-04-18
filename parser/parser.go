@@ -154,6 +154,12 @@ func (p *Parser) parseStatement() ast.Statement {
 			return nil
 		}
 		return stmt
+	case token.PRINT:
+		stmt := p.parsePrintStatement()
+		if stmt == nil {
+			return nil
+		}
+		return stmt
 
 	default:
 		stmt := p.parseExpressionStatement()
@@ -405,6 +411,27 @@ func (p *Parser) parseStructStatement() *ast.StructStatement {
 	if !p.checkNextToken(token.RBRACKET) {
 		return nil
 	}
+	if !p.checkNextToken(token.SEMICOLON) {
+		return nil
+	}
+
+	return statement
+}
+
+func (p *Parser) parsePrintStatement() *ast.PrintStatement {
+	statement := &ast.PrintStatement{Token: p.curToken}
+
+	if !p.checkNextToken(token.LPAREN) {
+		return nil
+	}
+
+	p.nextToken()
+	statement.Value = p.parseExpression(LOWEST)
+
+	if !p.checkNextToken(token.RPAEREN) {
+		return nil
+	}
+
 	if !p.checkNextToken(token.SEMICOLON) {
 		return nil
 	}

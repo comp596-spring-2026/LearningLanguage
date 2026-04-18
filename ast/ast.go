@@ -134,6 +134,17 @@ func (ss *StructStatement) String() string {
 	return out.String()
 }
 
+type PrintStatement struct {
+	Token token.Token
+	Value Expression
+}
+
+func (ps *PrintStatement) StatementNode()       {}
+func (ps *PrintStatement) TokenLiteral() string { return ps.Token.Literal }
+func (ps *PrintStatement) String() string {
+	return "Print(" + ps.Value.String() + ")"
+}
+
 type Identifier struct {
 	Token     token.Token
 	Value     string
