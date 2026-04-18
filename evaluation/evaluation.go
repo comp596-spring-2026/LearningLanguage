@@ -62,9 +62,9 @@ func evaluateStatement(statement ast.Statement) string {
 		output = evaluateStructStatement(structStmt)
 	}
 
-	exprStmt, ok := statement.(*ast.ExpressionStatement)
+	printStmt, ok := statement.(*ast.PrintStatement)
 	if ok {
-		value := evaluateExpression(exprStmt.Expression)
+		value := evaluateExpression(printStmt.Value)
 		switch value.dataType {
 		case INTTYPE:
 			output = strconv.FormatInt(value.intValue, 10) + "\n"

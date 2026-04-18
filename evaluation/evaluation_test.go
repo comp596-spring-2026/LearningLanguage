@@ -8,7 +8,9 @@ import (
 )
 
 func TestCreateSetEval(test *testing.T) {
-	input := `create int x;set x = 64;x;`
+	input := `create int x;
+			set x = 64;
+			print(x);`
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
@@ -26,7 +28,7 @@ func TestCreateSetEval(test *testing.T) {
 }
 
 func TestIfEval(test *testing.T) {
-	input := `if (1 > 2) begin; true; end; else begin; false; end;`
+	input := `if (1 > 2) begin; print("1 greater than 2"); end; else begin; print("1 not greater than 2"); end;`
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
@@ -38,7 +40,7 @@ func TestIfEval(test *testing.T) {
 
 	output = strings.TrimSpace(output)
 
-	if output != "false" {
+	if output != "1 not greater than 2" {
 		test.Fatalf("Incorrect variable value, expected false, got %s", output)
 	}
 }
@@ -47,8 +49,8 @@ func TestStructEval(test *testing.T) {
 	input := `struct myStruct (int x, bool y);
 				set myStruct.x = 123;
 				set myStruct.y = false;
-				myStruct.x;
-				myStruct.y;`
+				print(myStruct.x);
+				print(myStruct.y);`
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
@@ -66,7 +68,7 @@ func TestStructEval(test *testing.T) {
 }
 
 func TestPrefixEval(test *testing.T) {
-	input := `-123; !true;`
+	input := `print(-123); print(!true);`
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
@@ -84,7 +86,16 @@ func TestPrefixEval(test *testing.T) {
 }
 
 func TestInfixEval(test *testing.T) {
-	input := `1+1;2-2;10/5;8*8;1>0;1>=1;1==1;1!=1;1<2;1<=1;`
+	input := `print(1+1);
+			print(2-2);
+			print(10/5);
+			print(8*8);
+			print(1>0);
+			print(1>=1);
+			print(1==1);
+			print(1!=1);
+			print(1<2);
+			print(1<=1);`
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
@@ -104,16 +115,16 @@ func TestInfixEval(test *testing.T) {
 func TestDataTypes(test *testing.T) {
 	input := `create int w;
 				set w = 123;
-				w;
+				print(w);
 				create bool x;
 				set x = true;
-				x;
+				print(x);
 				create float y;
 				set y = 3.14;
-				y;
+				print(y);
 				create string z;
 				set z = "Hello World";
-				z;`
+				print(z);`
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
