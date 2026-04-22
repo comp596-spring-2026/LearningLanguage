@@ -24,9 +24,19 @@ type Data struct {
 }
 
 var variableTypes = map[string]int{
-	"int":  INTTYPE,
-	"bool": BOOLTYPE,
+	"int":    INTTYPE,
+	"bool":   BOOLTYPE,
+	"string": STRINGTYPE,
+	"float":  FLOATTYPE,
 }
+
+var dataTypeToString = map[int]string{
+	INTTYPE:    "INT",
+	BOOLTYPE:   "BOOL",
+	STRINGTYPE: "STRING",
+	FLOATTYPE:  "FLOAT",
+}
+
 var variableMap = make(map[string]Data)
 var errors []string
 
@@ -94,10 +104,15 @@ func evaluateSetStatement(statement *ast.SetStatement) string {
 	}
 	_, ok := variableMap[name]
 	if !ok {
-		errors = append(errors, fmt.Sprintf("Variable %s has not been created.", statement.Name.Value))
+		errors = append(errors, fmt.Sprintf("Variable %s has not been created.", name))
 		return ""
 	}
-	variableMap[name] = evaluateExpression(statement.Value)
+	value := evaluateExpression(statement.Value)
+	if value.dataType != variableMap[name].dataType {
+		errors = append(errors, fmt.Sprintf("Expected data type: %s. Got data type: %s",
+			dataTypeToString[variableMap[name].dataType], dataTypeToString[value.dataType]))
+		return ""
+	}
 	return ""
 }
 
