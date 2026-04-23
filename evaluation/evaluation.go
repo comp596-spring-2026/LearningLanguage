@@ -113,13 +113,18 @@ func evaluateSetStatement(statement *ast.SetStatement) string {
 			dataTypeToString[variableMap[name].dataType], dataTypeToString[value.dataType]))
 		return ""
 	}
+	variableMap[name] = value
 	return ""
 }
 
 func evaluateStructStatement(statement *ast.StructStatement) string {
 	for _, attribute := range statement.Attributes {
 		attributeName := fmt.Sprintf("%s.%s", statement.StructIdent.Value, attribute.Value)
-		variableMap[attributeName] = evaluateExpression(statement.Values[attribute.Value])
+		if statement.Values[attribute.Value] == nil {
+			variableMap[attributeName] = Data{dataType: variableTypes[attribute.DataType]}
+		} else {
+			variableMap[attributeName] = evaluateExpression(statement.Values[attribute.Value])
+		}
 	}
 	return ""
 }

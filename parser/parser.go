@@ -363,10 +363,21 @@ func (p *Parser) parseStructStatement() *ast.StructStatement {
 	if !p.checkMultipleNextToken(DATATYPES) {
 		return nil
 	}
+	var datatype string
+	switch p.curToken.Type {
+	case token.INT:
+		datatype = "int"
+	case token.BOOL:
+		datatype = "bool"
+	case token.STRING:
+		datatype = "string"
+	case token.FLOAT:
+		datatype = "float"
+	}
 	if !p.checkNextToken(token.IDENT) {
 		return nil
 	}
-	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal, DataType: datatype}
 	statement.Attributes = append(statement.Attributes, *ident)
 
 	for p.peekToken.Type == token.COMMA {
@@ -374,10 +385,20 @@ func (p *Parser) parseStructStatement() *ast.StructStatement {
 		if !p.checkMultipleNextToken(DATATYPES) {
 			return nil
 		}
+		switch p.curToken.Type {
+		case token.INT:
+			datatype = "int"
+		case token.BOOL:
+			datatype = "bool"
+		case token.STRING:
+			datatype = "string"
+		case token.FLOAT:
+			datatype = "float"
+		}
 		if !p.checkNextToken(token.IDENT) {
 			return nil
 		}
-		ident = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		ident = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal, DataType: datatype}
 		statement.Attributes = append(statement.Attributes, *ident)
 	}
 	if !p.checkNextToken(token.RPAEREN) {

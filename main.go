@@ -6,35 +6,38 @@ import (
 	"learningLanguage/evaluation"
 	"learningLanguage/lexer"
 	"learningLanguage/parser"
-	"learningLanguage/repl"
 	"os"
 )
 
 func main() {
-	if len(os.Args) == 1 {
-		repl.StartREPL()
-	} else {
-		inFile := os.Stdin
-		outFile := os.Stdout
-		index := 1
-		for index < len(os.Args) {
-			switch os.Args[index] {
-			case "-i":
-				index++
-				inFile, _ = os.Open(os.Args[index])
-			case "-o":
-				index++
-				outFile, _ = os.OpenFile(os.Args[index], os.O_WRONLY|os.O_CREATE, 0600)
-			default:
-				index++
-			}
-		}
-		executeProgram(inFile, outFile)
-		inFile.Close()
-		outFile.Close()
-	}
-	// line := "if (1 != 1) begin; 123; end; else begin; 321; end;"
-	// debug(line)
+	// if len(os.Args) == 1 {
+	// 	repl.StartREPL()
+	// } else {
+	// 	inFile := os.Stdin
+	// 	outFile := os.Stdout
+	// 	index := 1
+	// 	for index < len(os.Args) {
+	// 		switch os.Args[index] {
+	// 		case "-i":
+	// 			index++
+	// 			inFile, _ = os.Open(os.Args[index])
+	// 		case "-o":
+	// 			index++
+	// 			outFile, _ = os.OpenFile(os.Args[index], os.O_WRONLY|os.O_CREATE, 0600)
+	// 		default:
+	// 			index++
+	// 		}
+	// 	}
+	// 	executeProgram(inFile, outFile)
+	// 	inFile.Close()
+	// 	outFile.Close()
+	// }
+	line := `struct myStruct (int x, bool y);
+			set myStruct.x = 123;
+			set myStruct.y = false;
+			print(myStruct.x);
+			print(myStruct.y);`
+	debug(line)
 }
 
 func executeProgram(in io.Reader, out io.Writer) {
