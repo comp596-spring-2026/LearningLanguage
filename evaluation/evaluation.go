@@ -123,7 +123,12 @@ func evaluateStructStatement(statement *ast.StructStatement) string {
 		if statement.Values[attribute.Value] == nil {
 			variableMap[attributeName] = Data{dataType: variableTypes[attribute.DataType]}
 		} else {
-			variableMap[attributeName] = evaluateExpression(statement.Values[attribute.Value])
+			value := evaluateExpression(statement.Values[attribute.Value])
+			if variableTypes[attribute.DataType] != value.dataType {
+				errors = append(errors, fmt.Sprintf("Expected data type: %s. Got data type: %s",
+					attribute.DataType, dataTypeToString[value.dataType]))
+				return ""
+			}
 		}
 	}
 	return ""
